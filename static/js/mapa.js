@@ -25,8 +25,14 @@ function crearMapa(idContenedor, opciones = {}) {
     maxZoom: 19, attribution: "© OpenStreetMap",
   });
 
+  // nombres de paises, departamentos, ciudades y rios encima del satelite
+  const nombres = L.tileLayer(
+    "https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}",
+    { maxZoom: 19 }
+  ).addTo(mapa);
+
   const encuadre = L.featureGroup().addTo(mapa);
-  const superpuestas = {};
+  const superpuestas = { "Nombres y límites": nombres };
 
   const limites = L.latLngBounds([]);
   const imagenes = leerDatos("mapa-imagenes").map((img) => {
@@ -74,6 +80,7 @@ function crearMapa(idContenedor, opciones = {}) {
     return div;
   };
   leyenda.addTo(mapa);
+  agregarBuscador(mapa);
 
   if (opciones.centro) {
     mapa.setView(opciones.centro, opciones.zoom || 16);
@@ -85,4 +92,42 @@ function crearMapa(idContenedor, opciones = {}) {
   // la imagen se agrega despues de fijar la vista; antes Leaflet no puede posicionarla
   if (imagenes.length) imagenes[0].addTo(mapa).bringToBack();
   return mapa;
+}
+
+// Buscador de lugares con OpenStreetMap (Nominatim), limitado a Peru.
+function agregarBuscador(mapa) {
+  const control = L.control({ position: "topright" });
+  control.onAdd = () => {
+    const div = L.DomUtil.create("div", "buscador");
+    div.innerHTML = '<input type="search" placeholder="Buscar lugar (ej. Puerto Maldonado)">';
+    L.DomEvent.disableClickPropagation(div);
+    L.DomEvent.disableScrollPropagation(div);
+    const campo = div.querySelector("input");
+
+    campo.addEventListener("keydown", async (e) => {
+      if (e.key !== "Enter") return;
+      e.preventDefault(); // el mapa a veces esta dentro de un formulario
+      const texto = campo.value.trim();
+      if (!texto) return;
+      campo.disabled = true;
+      try {
+        const url = "https://nominatim.openstreetmap.org/search?format=json&limit=1&countrycodes=pe&q=" +
+          encodeURIComponent(texto);
+        const resultados = await (await fetch(url)).json();
+        if (!resultados.length) {
+          campo.classList.add("sin-resultado");
+          return;
+        }
+        const [sur, norte, oeste, este] = resultados[0].boundingbox.map(Number);
+        mapa.fitBounds([[sur, oeste], [norte, este]], { maxZoom: 14 });
+      } catch {
+        campo.classList.add("sin-resultado");
+      } finally {
+        campo.disabled = false;
+      }
+    });
+    campo.addEventListener("input", () => campo.classList.remove("sin-resultado"));
+    return div;
+  };
+  control.addTo(mapa);
 }

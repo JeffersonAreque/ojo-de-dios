@@ -59,3 +59,9 @@ body { background: var(--fondo); color: #1d2a20; font-size: .95rem; }
 
 .login { max-width: 380px; margin: 10vh auto; }
 .evidencia img { width: 100%; border-radius: .4rem; border: 1px solid var(--borde); }
+
+.buscador input {
+  width: 260px; padding: .45rem .7rem; border: 1px solid var(--borde); border-radius: .4rem;
+  box-shadow: 0 1px 4px rgba(0,0,0,.25); font-size: .85rem;
+}
+.buscador input.sin-resultado { border-color: var(--alta); outline-color: var(--alta); }
