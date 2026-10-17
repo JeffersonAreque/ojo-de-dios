@@ -1,5 +1,6 @@
 // Utilidades de mapa (Leaflet) compartidas por todas las pantallas.
-const COLOR_GRAVEDAD = { alta: "#c0392b", media: "#e67e22", baja: "#d4ac0d" };
+const COLOR_GRAVEDAD = { alta: "#EC4C86", media: "#F39C4A", baja: "#E8C547" };
+const COLOR_LIMITE = "#F6E7A6";
 const CENTRO_PUERTO_MALDONADO = [-12.6, -69.19];
 
 function esc(texto) {
@@ -43,7 +44,7 @@ function crearMapa(idContenedor, opciones = {}) {
   });
 
   leerDatos("mapa-concesiones").forEach((c) => {
-    const poligono = L.polygon(aLatLng(c.limite), { color: "#7CFC00", weight: 2, fillOpacity: 0.04 })
+    const poligono = L.polygon(aLatLng(c.limite), { color: COLOR_LIMITE, weight: 2.5, dashArray: "8 6", fillOpacity: 0 })
       .bindTooltip(esc(c.nombre))
       .addTo(encuadre);
     limites.extend(poligono.getBounds());
@@ -59,10 +60,10 @@ function crearMapa(idContenedor, opciones = {}) {
       `Área: ${Math.round(a.area).toLocaleString()} m²<br>` +
       `Estado: ${a.estado}<br><a href="/alertas/${a.id}/">Ver detalle</a>`;
     L.polygon(aLatLng(a.poligono), {
-      color, weight: 2, fillOpacity: opciones.soloContorno ? 0 : 0.35, dashArray: pendiente ? "5 5" : null,
+      color, weight: 2, fillOpacity: opciones.soloContorno ? 0 : 0.15, dashArray: pendiente ? "5 5" : null,
     }).bindPopup(popup).addTo(capaAlertas);
     L.circleMarker([a.lat, a.lon], {
-      radius: 7, color: "#fff", weight: 2, fillColor: color, fillOpacity: 1,
+      radius: 7, color: "#0D1813", weight: 2, fillColor: color, fillOpacity: 1,
     }).bindPopup(popup).addTo(capaAlertas);
     limites.extend([a.lat, a.lon]);
     aLatLng(a.poligono).forEach((p) => limitesAlertas.extend(p));
@@ -75,10 +76,10 @@ function crearMapa(idContenedor, opciones = {}) {
   leyenda.onAdd = () => {
     const div = L.DomUtil.create("div", "leyenda");
     div.innerHTML =
-      '<span style="background:#c0392b"></span>Alta<br>' +
-      '<span style="background:#e67e22"></span>Media<br>' +
-      '<span style="background:#d4ac0d"></span>Baja<br>' +
-      '<span style="background:#7CFC00"></span>Límite de concesión';
+      `<span style="background:${COLOR_GRAVEDAD.alta}"></span>Gravedad alta<br>` +
+      `<span style="background:${COLOR_GRAVEDAD.media}"></span>Gravedad media<br>` +
+      `<span style="background:${COLOR_GRAVEDAD.baja}"></span>Gravedad baja<br>` +
+      `<i class="linea-limite"></i>Límite de concesión`;
     return div;
   };
   leyenda.addTo(mapa);

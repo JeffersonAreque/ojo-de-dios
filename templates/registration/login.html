@@ -1,21 +1,33 @@
 {% extends "base.html" %}
+{% load static %}
 {% block titulo %}Ingresar{% endblock %}
 {% block publico %}
-<div class="login">
-  <div class="text-center mb-4">
-    <div class="fs-2 fw-bold" style="color:var(--bosque)"><i class="bi bi-eye"></i> Ojo de Dios</div>
-    <div class="text-secondary">Vigilancia forestal con dron e IA · Zona de amortiguamiento RN Tambopata</div>
-  </div>
-  <div class="tarjeta">
+<div class="ingreso">
+  <section class="vista" style="background-image:url('{% static 'img/dosel.jpg' %}')" aria-hidden="true">
+    <div class="reticula"></div>
+    <div class="barrido"></div>
+    <span class="coord a">MADRE DE DIOS · PERÚ</span>
+    <span class="coord b">SENTINEL-2 · 10 m</span>
+    <div class="lema">
+      <p>Vigilamos el bosque de Madre&nbsp;de&nbsp;Dios desde el espacio.</p>
+      <small>Imágenes Sentinel-2 de la zona de amortiguamiento de la Reserva Nacional Tambopata.</small>
+    </div>
+  </section>
+
+  <main class="acceso">
+    <div class="marca">{% include "_logo.html" %}<span><span class="marca-nombre">Ojo de Dios</span><small>Vigilancia forestal satelital</small></span></div>
+    <h1>Sepa qué cambia en su bosque</h1>
+    <p class="intro">Comparamos imágenes de cada vuelo y le avisamos dónde se perdió cobertura, con la evidencia lista para ARFFS y SERFOR.</p>
     {% if form.errors %}<div class="alert alert-danger py-2">Usuario o contraseña incorrectos.</div>{% endif %}
     <form method="post">{% csrf_token %}
-      <label class="form-label">Usuario</label>
-      <input name="username" class="form-control mb-3" autofocus required>
-      <label class="form-label">Contraseña</label>
-      <input name="password" type="password" class="form-control mb-4" required>
+      <label class="form-label" for="usuario">Usuario</label>
+      <input id="usuario" name="username" class="form-control mb-3" autocomplete="username" autofocus required>
+      <label class="form-label" for="clave">Contraseña</label>
+      <input id="clave" name="password" type="password" class="form-control mb-4" autocomplete="current-password" required>
       <input type="hidden" name="next" value="{{ next }}">
-      <button class="btn btn-bosque w-100">Ingresar</button>
+      <button class="btn btn-bosque w-100 py-2">Ingresar</button>
     </form>
-  </div>
+    <p class="pie">Concesiones de Madre de Dios · Piloto 2026</p>
+  </main>
 </div>
 {% endblock %}
