@@ -48,7 +48,7 @@ def ejecutar_analisis(concesion, imagen_antes, imagen_despues, usuario):
         analisis.cobertura_antes_pct = resultado.cobertura_antes_pct
         analisis.cobertura_despues_pct = resultado.cobertura_despues_pct
         analisis.area_perdida_m2 = resultado.area_perdida_m2
-        analisis.mensaje = f"{len(resultado.detecciones)} zona(s) con pérdida de cobertura. Umbral ExG: {resultado.umbral}"
+        analisis.mensaje = f"{len(resultado.detecciones)} zona(s) con pérdida de cobertura. Umbral ExG antes/después: {resultado.umbral[0]} / {resultado.umbral[1]}"
         ok, png = cv2.imencode(".png", resultado.imagen_resultado)
         analisis.save()
         if ok:

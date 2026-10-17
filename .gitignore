@@ -10,3 +10,7 @@ staticfiles/
 *.sqlite3
 .DS_Store
 Thumbs.db
+
+# imagenes de trabajo (se suben por la app, no al repositorio)
+*.tif
+*.tiff

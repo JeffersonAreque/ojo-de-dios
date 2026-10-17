@@ -2,7 +2,8 @@
 
 Metodo (version 1 del piloto):
   1. Se recortan ambas imagenes a la zona geografica que comparten.
-  2. Se calcula el indice de verdor ExG (Excess Green) normalizado:
+  2. Se calcula el indice de verdor ExG (Excess Green) normalizado
+     y un umbral automatico (Otsu) para cada fecha:
          ExG = 2g - r - b,  con r, g, b = R/(R+G+B) ...
      La vegetacion tiene ExG alto; suelo desnudo, agua turbia o trochas, bajo.
   3. Pixel con vegetacion antes y sin vegetacion despues = perdida.
@@ -21,7 +22,7 @@ import numpy as np
 from concesiones.geo import METROS_POR_GRADO, metros_por_grado_lon
 
 LADO_MAXIMO_PX = 3000
-UMBRAL_MIN, UMBRAL_MAX = 0.02, 0.15
+UMBRAL_MIN, UMBRAL_MAX = 0.03, 0.35
 
 
 @dataclass
@@ -66,7 +67,7 @@ class Deteccion:
 class Resultado:
     cobertura_antes_pct: float
     cobertura_despues_pct: float
-    umbral: float
+    umbral: tuple
     detecciones: list = field(default_factory=list)
     imagen_resultado: np.ndarray = None
 
@@ -86,12 +87,18 @@ def indice_verdor(img_bgr):
     return (2 * g - r - b) / total
 
 
-def umbral_vegetacion(*indices):
-    """Otsu sobre el ExG de ambas fechas, acotado a un rango razonable."""
-    valores = np.concatenate([i.ravel() for i in indices])
-    escalado = np.clip((valores + 1) / 3 * 255, 0, 255).astype(np.uint8)
+def umbral_vegetacion(indice):
+    """Umbral de Otsu propio de cada imagen.
+
+    Se calcula por separado para cada fecha porque la bruma, la hora y la
+    estacion cambian el color del bosque entre una imagen y otra.
+    """
+    escalado = np.clip((indice.ravel() + 1) / 3 * 255, 0, 255).astype(np.uint8)
     t, _ = cv2.threshold(escalado, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
     umbral = t / 255 * 3 - 1
+    # Si casi todo es bosque, Otsu parte el bosque en dos (tonos claros y oscuros).
+    # Por eso el umbral nunca supera el 60 % del verdor tipico (mediana) de la imagen.
+    umbral = min(umbral, 0.6 * float(np.median(indice)))
     return float(np.clip(umbral, UMBRAL_MIN, UMBRAL_MAX))
 
 
@@ -149,9 +156,10 @@ def comparar(img_antes, lim_antes, img_despues, lim_despues, area_minima_m2=300)
 
     exg_antes = cv2.GaussianBlur(indice_verdor(antes), (5, 5), 0)
     exg_despues = cv2.GaussianBlur(indice_verdor(despues), (5, 5), 0)
-    umbral = umbral_vegetacion(exg_antes, exg_despues)
-    veg_antes = exg_antes > umbral
-    veg_despues = exg_despues > umbral
+    umbral_antes = umbral_vegetacion(exg_antes)
+    umbral_despues = umbral_vegetacion(exg_despues)
+    veg_antes = exg_antes > umbral_antes
+    veg_despues = exg_despues > umbral_despues
 
     perdida = (veg_antes & ~veg_despues).astype(np.uint8) * 255
     # apertura pequena para no borrar trochas delgadas; cierre mayor para unir fragmentos
@@ -189,7 +197,7 @@ def comparar(img_antes, lim_antes, img_despues, lim_despues, area_minima_m2=300)
     return Resultado(
         cobertura_antes_pct=round(float(veg_antes.mean()) * 100, 2),
         cobertura_despues_pct=round(float(veg_despues.mean()) * 100, 2),
-        umbral=round(umbral, 3),
+        umbral=(round(umbral_antes, 3), round(umbral_despues, 3)),
         detecciones=detecciones,
         imagen_resultado=marcada,
     )
