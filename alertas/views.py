@@ -50,6 +50,8 @@ def historial(request):
     if filtros["concesion"]:
         alertas = alertas.filter(concesion_id=filtros["concesion"])
 
+    alertas = alertas.order_by("-analisis__ejecutado", "-area_m2")
+
     if request.GET.get("formato") == "csv":
         return _csv(alertas)
 
@@ -77,8 +79,13 @@ def detalle(request, pk):
             alerta.revisar(request.user, confirmar, request.POST.get("comentario", "").strip())
             messages.success(request, "Alerta confirmada y visible para el concesionario." if confirmar
                              else "Detección descartada; no se notifica al concesionario.")
-        siguiente = alertas_visibles(request.user).filter(estado=Alerta.Estado.PENDIENTE).order_by("creado").first()
-        return redirect("alertas:detalle", pk=siguiente.pk) if siguiente else redirect("alertas:historial")
+        siguiente = (
+            alertas_visibles(request.user)
+            .filter(estado=Alerta.Estado.PENDIENTE, analisis=alerta.analisis)
+            .order_by("-area_m2")
+            .first()
+        )
+        return redirect("alertas:detalle", pk=siguiente.pk) if siguiente else redirect("analisis:detalle", pk=alerta.analisis_id)
 
     c = alerta.concesion
     a = alerta.analisis

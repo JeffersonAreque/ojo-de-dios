@@ -44,5 +44,5 @@
 {{ mapa_imagenes|json_script:"mapa-imagenes" }}
 {% endblock %}
 {% block js %}<script>
-  crearMapa("mapa", { centro: [{{ alerta.latitud|unlocalize }}, {{ alerta.longitud|unlocalize }}], zoom: 16 });
+  crearMapa("mapa", { encuadrarAlertas: true });
 </script>{% endblock %}

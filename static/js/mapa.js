@@ -50,6 +50,7 @@ function crearMapa(idContenedor, opciones = {}) {
   });
 
   const capaAlertas = L.layerGroup().addTo(mapa);
+  const limitesAlertas = L.latLngBounds([]);
   leerDatos("mapa-alertas").forEach((a) => {
     const color = COLOR_GRAVEDAD[a.gravedad];
     const pendiente = a.estado === "pendiente";
@@ -64,6 +65,7 @@ function crearMapa(idContenedor, opciones = {}) {
       radius: 7, color: "#fff", weight: 2, fillColor: color, fillOpacity: 1,
     }).bindPopup(popup).addTo(capaAlertas);
     limites.extend([a.lat, a.lon]);
+    aLatLng(a.poligono).forEach((p) => limitesAlertas.extend(p));
   });
   superpuestas["Alertas"] = capaAlertas;
 
@@ -82,7 +84,9 @@ function crearMapa(idContenedor, opciones = {}) {
   leyenda.addTo(mapa);
   agregarBuscador(mapa);
 
-  if (opciones.centro) {
+  if (opciones.encuadrarAlertas && limitesAlertas.isValid()) {
+    mapa.fitBounds(limitesAlertas, { padding: [60, 60], maxZoom: 16 });
+  } else if (opciones.centro) {
     mapa.setView(opciones.centro, opciones.zoom || 16);
   } else if (limites.isValid()) {
     mapa.fitBounds(limites, { padding: [30, 30], maxZoom: 16 });
