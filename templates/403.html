@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% block titulo %}Acceso no permitido{% endblock %}
+{% block contenido %}
+<div class="tarjeta text-center mx-auto" style="max-width:520px;margin-top:10vh">
+  <div class="fs-1" style="color:var(--alta)"><i class="bi bi-shield-lock"></i></div>
+  <h1 class="h4 mt-2">Acceso no permitido</h1>
+  <p class="text-secondary">Tu rol{% if user.is_authenticated %} ({{ user.get_rol_display }}){% endif %} no tiene permiso para usar esta sección.</p>
+  <a href="{% url 'inicio' %}" class="btn btn-bosque">Volver al mapa</a>
+</div>
+{% endblock %}
+{% block publico %}
+<div class="login text-center"><h1 class="h4">Acceso no permitido</h1><a href="{% url 'login' %}">Ingresar</a></div>
+{% endblock %}
