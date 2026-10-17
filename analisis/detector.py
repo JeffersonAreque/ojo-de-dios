@@ -138,7 +138,18 @@ def clasificar(contorno, area_m2):
     return tipo, gravedad
 
 
-def comparar(img_antes, lim_antes, img_despues, lim_despues, area_minima_m2=300):
+def recuadro_px(caja, zona, ancho, alto):
+    """Convierte una zona geografica en (x0, y0, x1, y1) dentro de la imagen recortada."""
+    x0 = max(0, int((zona.oeste - caja.oeste) / (caja.este - caja.oeste) * ancho))
+    x1 = min(ancho, int(round((zona.este - caja.oeste) / (caja.este - caja.oeste) * ancho)))
+    y0 = max(0, int((caja.norte - zona.norte) / (caja.norte - caja.sur) * alto))
+    y1 = min(alto, int(round((caja.norte - zona.sur) / (caja.norte - caja.sur) * alto)))
+    return x0, y0, x1, y1
+
+
+def comparar(img_antes, lim_antes, img_despues, lim_despues, area_minima_m2=300, zona=None):
+    """Compara dos imagenes. Si se indica `zona` (la concesion mas su perimetro),
+    los umbrales se calculan con toda la imagen pero solo se buscan cambios en esa zona."""
     caja = lim_antes.interseccion(lim_despues)
     if caja is None:
         raise ErrorAnalisis("Las dos imágenes no cubren una zona en común.")
@@ -161,7 +172,16 @@ def comparar(img_antes, lim_antes, img_despues, lim_despues, area_minima_m2=300)
     veg_antes = exg_antes > umbral_antes
     veg_despues = exg_despues > umbral_despues
 
-    perdida = (veg_antes & ~veg_despues).astype(np.uint8) * 255
+    if zona is not None:
+        if caja.interseccion(zona) is None:
+            raise ErrorAnalisis("Las imágenes no cubren la concesión.")
+        x0, y0, x1, y1 = recuadro_px(caja, zona, ancho, alto)
+    else:
+        x0, y0, x1, y1 = 0, 0, ancho, alto
+    dentro = np.zeros((alto, ancho), bool)
+    dentro[y0:y1, x0:x1] = True
+
+    perdida = (veg_antes & ~veg_despues & dentro).astype(np.uint8) * 255
     # apertura pequena para no borrar trochas delgadas; cierre mayor para unir fragmentos
     perdida = cv2.morphologyEx(perdida, cv2.MORPH_OPEN, cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (3, 3)))
     perdida = cv2.morphologyEx(perdida, cv2.MORPH_CLOSE, cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (7, 7)))
@@ -193,10 +213,12 @@ def comparar(img_antes, lim_antes, img_despues, lim_despues, area_minima_m2=300)
     cv2.drawContours(capa, validos, -1, (0, 0, 255), thickness=cv2.FILLED)
     marcada = cv2.addWeighted(capa, 0.35, marcada, 0.65, 0)
     cv2.drawContours(marcada, validos, -1, (0, 0, 255), thickness=2)
+    if zona is not None:
+        cv2.rectangle(marcada, (x0, y0), (x1 - 1, y1 - 1), (0, 255, 255), 2)
 
     return Resultado(
-        cobertura_antes_pct=round(float(veg_antes.mean()) * 100, 2),
-        cobertura_despues_pct=round(float(veg_despues.mean()) * 100, 2),
+        cobertura_antes_pct=round(float(veg_antes[dentro].mean()) * 100, 2),
+        cobertura_despues_pct=round(float(veg_despues[dentro].mean()) * 100, 2),
         umbral=(round(umbral_antes, 3), round(umbral_despues, 3)),
         detecciones=detecciones,
         imagen_resultado=marcada,

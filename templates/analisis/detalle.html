@@ -10,9 +10,9 @@
   <div class="alert alert-danger">{{ analisis.mensaje }}</div>
 {% else %}
 <div class="row g-3 mb-3">
-  <div class="col-6 col-lg-3"><div class="tarjeta kpi"><div class="valor">{{ analisis.cobertura_antes_pct|floatformat:1 }}%</div><div class="etiqueta">Cobertura vegetal antes</div></div></div>
-  <div class="col-6 col-lg-3"><div class="tarjeta kpi"><div class="valor">{{ analisis.cobertura_despues_pct|floatformat:1 }}%</div><div class="etiqueta">Cobertura vegetal después</div></div></div>
-  <div class="col-6 col-lg-3"><div class="tarjeta kpi"><div class="valor" style="color:var(--alta)">{{ analisis.area_perdida_m2|floatformat:"0g" }}</div><div class="etiqueta">m² de pérdida detectada</div></div></div>
+  <div class="col-6 col-lg-3"><div class="tarjeta kpi"><div class="valor">{{ analisis.cobertura_antes_pct|floatformat:1 }}%</div><div class="etiqueta">Cobertura vegetal antes (zona vigilada)</div></div></div>
+  <div class="col-6 col-lg-3"><div class="tarjeta kpi"><div class="valor">{{ analisis.cobertura_despues_pct|floatformat:1 }}%</div><div class="etiqueta">Cobertura vegetal después (zona vigilada)</div></div></div>
+  <div class="col-6 col-lg-3"><div class="tarjeta kpi"><div class="valor" style="color:var(--alta)">{{ analisis.area_perdida_ha|floatformat:"1g" }} ha</div><div class="etiqueta">Pérdida detectada (concesión + 500 m de perímetro)</div></div></div>
   <div class="col-6 col-lg-3"><div class="tarjeta kpi"><div class="valor">{{ alertas|length }}</div><div class="etiqueta">Detecciones</div></div></div>
 </div>
 <div class="row g-3">

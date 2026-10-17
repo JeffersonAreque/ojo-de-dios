@@ -46,7 +46,7 @@ def nuevo(request):
 @login_required
 def detalle(request, pk):
     analisis = get_object_or_404(analisis_visibles(request.user), pk=pk)
-    alertas = alertas_visibles(request.user).filter(analisis=analisis)
+    alertas = alertas_visibles(request.user).filter(analisis=analisis).order_by("-area_m2")
     c = analisis.concesion
     return render(request, "analisis/detalle.html", {
         "analisis": analisis,

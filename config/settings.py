@@ -90,3 +90,5 @@ LOGOUT_REDIRECT_URL = "login"
 
 # Parametros del analisis de cambio (ver analisis/detector.py)
 ANALISIS_AREA_MINIMA_M2 = float(os.getenv("ANALISIS_AREA_MINIMA_M2", "300"))
+# Perimetro alrededor de la concesion que tambien se vigila (metros)
+ANALISIS_MARGEN_M = float(os.getenv("ANALISIS_MARGEN_M", "500"))

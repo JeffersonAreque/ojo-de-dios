@@ -24,7 +24,7 @@
     <div class="tarjeta mb-3">
       <h2 class="h6">Análisis</h2>
       {% for a in analisis %}
-        <div class="border-bottom py-1"><a href="{% url 'analisis:detalle' a.pk %}">{{ a.imagen_antes.vuelo.fecha_vuelo|date:"d/m/Y" }} → {{ a.imagen_despues.vuelo.fecha_vuelo|date:"d/m/Y" }}</a> · {{ a.area_perdida_m2|floatformat:"0g" }} m² perdidos</div>
+        <div class="border-bottom py-1"><a href="{% url 'analisis:detalle' a.pk %}">{{ a.imagen_antes.vuelo.fecha_vuelo|date:"d/m/Y" }} → {{ a.imagen_despues.vuelo.fecha_vuelo|date:"d/m/Y" }}</a> · {{ a.area_perdida_ha|floatformat:"1g" }} ha perdidas</div>
       {% empty %}<p class="text-secondary mb-0">Aún no hay análisis.</p>{% endfor %}
     </div>
     {% endif %}

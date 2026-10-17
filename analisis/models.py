@@ -31,6 +31,10 @@ class Analisis(models.Model):
         )
 
     @property
+    def area_perdida_ha(self):
+        return round(self.area_perdida_m2 / 10_000, 1)
+
+    @property
     def variacion_cobertura(self):
         if self.cobertura_antes_pct is None or self.cobertura_despues_pct is None:
             return None

@@ -5,6 +5,7 @@ from django.core.files.base import ContentFile
 from django.db import transaction
 
 from alertas.models import Alerta
+from concesiones.geo import METROS_POR_GRADO, metros_por_grado_lon
 
 from .detector import ErrorAnalisis, Limites, comparar
 from .models import Analisis
@@ -24,6 +25,16 @@ def _limites(imagen):
     return Limites(imagen.norte, imagen.sur, imagen.este, imagen.oeste)
 
 
+def zona_vigilada(concesion):
+    """Caja de la concesion ampliada con el perimetro de vigilancia (por defecto 500 m)."""
+    caja = concesion.caja
+    lat_media = (caja["norte"] + caja["sur"]) / 2
+    margen = settings.ANALISIS_MARGEN_M
+    dlat = margen / METROS_POR_GRADO
+    dlon = margen / metros_por_grado_lon(lat_media)
+    return Limites(caja["norte"] + dlat, caja["sur"] - dlat, caja["este"] + dlon, caja["oeste"] - dlon)
+
+
 def ejecutar_analisis(concesion, imagen_antes, imagen_despues, usuario):
     """Compara dos imagenes de la concesion y registra las alertas pendientes."""
     analisis = Analisis(
@@ -37,6 +48,7 @@ def ejecutar_analisis(concesion, imagen_antes, imagen_despues, usuario):
             _leer(imagen_antes), _limites(imagen_antes),
             _leer(imagen_despues), _limites(imagen_despues),
             area_minima_m2=settings.ANALISIS_AREA_MINIMA_M2,
+            zona=zona_vigilada(concesion),
         )
     except ErrorAnalisis as e:
         analisis.estado = Analisis.Estado.ERROR
