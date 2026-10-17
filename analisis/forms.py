@@ -28,4 +28,12 @@ class AnalisisForm(EstiloBootstrap, forms.Form):
         antes, despues = datos.get("imagen_antes"), datos.get("imagen_despues")
         if antes and despues and antes.vuelo.fecha_vuelo >= despues.vuelo.fecha_vuelo:
             raise forms.ValidationError("La fecha base debe ser anterior a la fecha a comparar.")
+        if antes and despues:
+            from .models import Analisis
+            previo = Analisis.objects.filter(
+                imagen_antes=antes, imagen_despues=despues, estado=Analisis.Estado.COMPLETADO).first()
+            if previo:
+                raise forms.ValidationError(
+                    f"Estas dos fechas ya se compararon en el Análisis #{previo.pk}. "
+                    "Ábrelo desde la lista de análisis en lugar de repetirlo.")
         return datos

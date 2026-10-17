@@ -243,3 +243,6 @@ h1, h2, h3, h4, h5, h6, .h4, .h6, .kpi .valor, .marca-nombre { font-family: "Bar
 .lista-desplazable { max-height: calc(100vh - 330px); min-height: 300px; overflow-y: auto; }
 .lista-desplazable thead th { position: sticky; top: 0; background: var(--superficie); z-index: 1; }
 .lista-desplazable td { font-size: .88rem; }
+.dropdown-menu { --bs-dropdown-bg: var(--superficie); --bs-dropdown-border-color: var(--linea); --bs-dropdown-link-color: var(--tinta);
+  --bs-dropdown-link-hover-bg: var(--superficie-2); --bs-dropdown-link-hover-color: var(--tinta); --bs-dropdown-link-active-bg: var(--hoja); }
+.dropdown-item { padding: .5rem 1rem; white-space: normal; min-width: 240px; }

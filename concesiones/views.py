@@ -2,7 +2,8 @@ import json
 
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from django.db.models import Count, Max, Q
+from django.db.models import Count, Max, Q, Sum
+from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
 
 from alertas.models import Alerta
@@ -14,6 +15,7 @@ from cuentas.permisos import concesiones_visibles, rol_requerido
 
 from .forms import ConcesionariaForm, ConcesionForm
 from .models import Concesionaria
+from .reporte import generar_reporte
 
 
 @login_required
@@ -40,6 +42,8 @@ def detalle(request, pk):
         "comp": comp,
         "alertas": alertas[:6],
         "total_alertas": alertas.count(),
+        # Hectareas segun lo que este usuario puede ver: el cliente solo cuenta lo confirmado.
+        "ha_perdidas": (alertas.filter(analisis=ultimo).aggregate(t=Sum("area_m2"))["t"] or 0) / 10_000 if ultimo else 0,
         "vuelos": concesion.vuelos.select_related("operador").prefetch_related("imagenes"),
         "analisis": concesion.analisis.select_related("imagen_antes__vuelo", "imagen_despues__vuelo")[:5],
     }
@@ -48,6 +52,16 @@ def detalle(request, pk):
         contexto["mapa_concesiones"] = [{"id": concesion.pk, "nombre": concesion.nombre, "limite": concesion.limite}]
         contexto["mapa_alertas"] = alertas_geojson(alertas)
     return render(request, "concesiones/detalle.html", contexto)
+
+
+@login_required
+def reporte(request, pk):
+    """RF-005: reporte PDF de la concesion con las alertas confirmadas."""
+    concesion = get_object_or_404(concesiones_visibles(request.user), pk=pk)
+    pdf, nombre = generar_reporte(concesion, request.user, request.GET.get("formato", "resumen"))
+    respuesta = HttpResponse(pdf, content_type="application/pdf")
+    respuesta["Content-Disposition"] = f'inline; filename="{nombre}"'
+    return respuesta
 
 
 @rol_requerido(Usuario.Rol.ANALISTA)

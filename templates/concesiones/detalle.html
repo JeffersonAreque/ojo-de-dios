@@ -7,6 +7,13 @@
     <p>{{ concesion.concesionaria }} · {{ concesion.area_ha|floatformat:"1g" }} ha · {{ concesion.get_tipo_display }} · {{ concesion.codigo_contrato }}</p>
   </div>
   <div class="d-flex gap-2">
+    <div class="dropdown">
+      <button class="btn btn-outline-secondary dropdown-toggle" data-bs-toggle="dropdown"><i class="bi bi-file-earmark-pdf"></i> Descargar PDF</button>
+      <ul class="dropdown-menu dropdown-menu-end">
+        <li><a class="dropdown-item" target="_blank" href="{% url 'concesiones:reporte' concesion.pk %}?formato=resumen"><b>Resumen ejecutivo</b><small class="d-block text-secondary">1 página, para el titular</small></a></li>
+        <li><a class="dropdown-item" target="_blank" href="{% url 'concesiones:reporte' concesion.pk %}?formato=tecnico"><b>Informe técnico</b><small class="d-block text-secondary">Con firmas, para ARFFS o SERFOR</small></a></li>
+      </ul>
+    </div>
     {% if user.es_tecnico %}<a href="{% url 'vuelos:nuevo' %}?concesion={{ concesion.pk }}" class="btn btn-outline-secondary"><i class="bi bi-upload"></i> Registrar vuelo</a>{% endif %}
     {% if user.es_tecnico or user.es_analista %}<a href="{% url 'analisis:nuevo' %}?concesion={{ concesion.pk }}" class="btn btn-bosque"><i class="bi bi-layers"></i> Analizar cambios</a>{% endif %}
   </div>
@@ -27,7 +34,7 @@
     <div class="tarjeta">
       <h2 class="h6">Cambio entre {{ ultimo.imagen_antes.vuelo.fecha_vuelo|date:"F Y" }} y {{ ultimo.imagen_despues.vuelo.fecha_vuelo|date:"F Y" }}</h2>
       <div class="resumen">
-        <div class="perdida"><span class="cifra">{{ ultimo.area_perdida_ha|floatformat:"0g" }} ha</span><small>de bosque perdido</small></div>
+        <div class="perdida"><span class="cifra">{{ ha_perdidas|floatformat:"0g" }} ha</span><small>de bosque perdido{% if user.es_concesionario %} (confirmado){% endif %}</small></div>
         <div><span class="cifra">{{ total_alertas }}</span><small>zona{{ total_alertas|pluralize }} {% if user.es_concesionario %}confirmada{{ total_alertas|pluralize }}{% else %}detectada{{ total_alertas|pluralize }}{% endif %}</small></div>
         <div><span class="cifra">{{ ultimo.cobertura_antes_pct|floatformat:0 }} %</span><small>cobertura en {{ ultimo.imagen_antes.vuelo.fecha_vuelo|date:"Y" }}</small></div>
         <div><span class="cifra">{{ ultimo.cobertura_despues_pct|floatformat:0 }} %</span><small>cobertura en {{ ultimo.imagen_despues.vuelo.fecha_vuelo|date:"Y" }}</small></div>

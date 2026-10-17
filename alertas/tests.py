@@ -117,3 +117,26 @@ class FlujoAlertasTests(TestCase):
         for usuario in ("analista", "tecnico", "cliente"):
             self.entrar(usuario)
             self.assertEqual(self.client.get(reverse("negocio")).status_code, 403, usuario)
+
+    def test_reporte_pdf_de_la_concesion(self):
+        from analisis.models import Analisis
+        analisis = Analisis.objects.first()
+        alerta = Alerta.objects.filter(analisis=analisis).first()
+        self.entrar("analista")
+        self.client.post(reverse("alertas:detalle", args=[alerta.pk]), {"decision": "confirmar"})
+
+        self.entrar("cliente")
+        for formato in ("resumen", "tecnico"):
+            respuesta = self.client.get(reverse("concesiones:reporte", args=[analisis.concesion_id]), {"formato": formato})
+            self.assertEqual(respuesta.status_code, 200, formato)
+            self.assertEqual(respuesta["Content-Type"], "application/pdf")
+            self.assertTrue(respuesta.content.startswith(b"%PDF"))
+
+    def test_no_se_repite_un_analisis_de_las_mismas_fechas(self):
+        from analisis.forms import AnalisisForm
+        from analisis.models import Analisis
+        previo = Analisis.objects.first()
+        form = AnalisisForm({"imagen_antes": previo.imagen_antes_id, "imagen_despues": previo.imagen_despues_id},
+                            concesion=previo.concesion)
+        self.assertFalse(form.is_valid())
+        self.assertIn(f"Análisis #{previo.pk}", str(form.errors))
