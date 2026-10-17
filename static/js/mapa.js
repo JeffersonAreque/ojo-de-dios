@@ -59,7 +59,7 @@ function crearMapa(idContenedor, opciones = {}) {
       `Área: ${Math.round(a.area).toLocaleString()} m²<br>` +
       `Estado: ${a.estado}<br><a href="/alertas/${a.id}/">Ver detalle</a>`;
     L.polygon(aLatLng(a.poligono), {
-      color, weight: 2, fillOpacity: 0.35, dashArray: pendiente ? "5 5" : null,
+      color, weight: 2, fillOpacity: opciones.soloContorno ? 0 : 0.35, dashArray: pendiente ? "5 5" : null,
     }).bindPopup(popup).addTo(capaAlertas);
     L.circleMarker([a.lat, a.lon], {
       radius: 7, color: "#fff", weight: 2, fillColor: color, fillOpacity: 1,
@@ -95,6 +95,7 @@ function crearMapa(idContenedor, opciones = {}) {
   }
   // la imagen se agrega despues de fijar la vista; antes Leaflet no puede posicionarla
   if (imagenes.length) imagenes[0].addTo(mapa).bringToBack();
+  mapa.imagenes = imagenes;
   return mapa;
 }
 
@@ -134,4 +135,16 @@ function agregarBuscador(mapa) {
     return div;
   };
   control.addTo(mapa);
+}
+
+// Muestra solo una de las imagenes del mapa (0 = despues, 1 = antes) para compararlas.
+function mostrarImagen(mapa, indice, boton) {
+  mapa.imagenes.forEach((capa, i) => {
+    if (i === indice) capa.addTo(mapa).bringToBack();
+    else capa.remove();
+  });
+  if (boton) {
+    boton.parentElement.querySelectorAll("button").forEach((b) => b.classList.remove("active"));
+    boton.classList.add("active");
+  }
 }

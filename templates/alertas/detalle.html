@@ -9,7 +9,14 @@
        <span class="insignia e-{{ alerta.estado }} fs-6">{{ alerta.get_estado_display }}</span></div>
 </div>
 <div class="row g-3">
-  <div class="col-lg-7"><div id="mapa" class="mapa"></div></div>
+  <div class="col-lg-7">
+    <div class="btn-group btn-group-sm mb-2" role="group">
+      <button type="button" class="btn btn-outline-secondary" onclick="mostrarImagen(mapa, 1, this)">Ver antes ({{ alerta.analisis.imagen_antes.vuelo.fecha_vuelo|date:"Y" }})</button>
+      <button type="button" class="btn btn-outline-secondary active" onclick="mostrarImagen(mapa, 0, this)">Ver después ({{ alerta.fecha_deteccion|date:"Y" }})</button>
+    </div>
+    <div id="mapa" class="mapa"></div>
+    <small class="text-secondary">El contorno marca la zona detectada. Alterna entre las dos fechas para comprobar el cambio.</small>
+  </div>
   <div class="col-lg-5">
     <div class="tarjeta mb-3">
       <h2 class="h6">Datos de la detección</h2>
@@ -44,5 +51,5 @@
 {{ mapa_imagenes|json_script:"mapa-imagenes" }}
 {% endblock %}
 {% block js %}<script>
-  crearMapa("mapa", { encuadrarAlertas: true });
+  const mapa = crearMapa("mapa", { encuadrarAlertas: true, soloContorno: true });
 </script>{% endblock %}

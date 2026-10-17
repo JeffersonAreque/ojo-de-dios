@@ -16,7 +16,13 @@
   <div class="col-6 col-lg-3"><div class="tarjeta kpi"><div class="valor">{{ alertas|length }}</div><div class="etiqueta">Detecciones</div></div></div>
 </div>
 <div class="row g-3">
-  <div class="col-lg-7"><div id="mapa" class="mapa"></div></div>
+  <div class="col-lg-7">
+    <div class="btn-group btn-group-sm mb-2" role="group">
+      <button type="button" class="btn btn-outline-secondary" onclick="mostrarImagen(mapa, 1, this)">Ver antes ({{ analisis.imagen_antes.vuelo.fecha_vuelo|date:"Y" }})</button>
+      <button type="button" class="btn btn-outline-secondary active" onclick="mostrarImagen(mapa, 0, this)">Ver después ({{ analisis.imagen_despues.vuelo.fecha_vuelo|date:"Y" }})</button>
+    </div>
+    <div id="mapa" class="mapa"></div>
+  </div>
   <div class="col-lg-5">
     <div class="tarjeta mb-3">
       <h2 class="h6">Evidencia: antes / después / cambios</h2>
@@ -49,4 +55,4 @@
 {{ mapa_alertas|json_script:"mapa-alertas" }}
 {{ mapa_imagenes|json_script:"mapa-imagenes" }}
 {% endblock %}
-{% block js %}{% if analisis.estado != "error" %}<script>crearMapa("mapa");</script>{% endif %}{% endblock %}
+{% block js %}{% if analisis.estado != "error" %}<script>const mapa = crearMapa("mapa");</script>{% endif %}{% endblock %}
