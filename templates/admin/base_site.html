@@ -1,0 +1,19 @@
+{% extends "admin/base.html" %}
+{% load static %}
+
+{% block title %}{% if subtitle %}{{ subtitle }} | {% endif %}{{ title }} | {{ site_title }}{% endblock %}
+
+{# Sin el modo claro/oscuro de Django: el panel usa siempre el tema del sistema #}
+{% block dark-mode-vars %}{% endblock %}
+
+{% block extrastyle %}
+<link rel="stylesheet" href="{% static 'css/admin.css' %}?v=3">
+{% endblock %}
+
+{% block branding %}
+<div id="site-name">
+  <a href="{% url 'admin:index' %}" class="marca-admin">{% include "_logo.html" %}<span>Ojo de Dios<small>Administración</small></span></a>
+</div>
+{% endblock %}
+
+{% block nav-global %}{% endblock %}

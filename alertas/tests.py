@@ -96,3 +96,18 @@ class FlujoAlertasTests(TestCase):
         self.entrar("analista")
         self.assertContains(self.client.get(reverse("analisis:detalle", args=[analisis.pk])), "data-comparador")
         self.assertContains(self.client.get(reverse("concesiones:detalle", args=[analisis.concesion_id])), "data-comparador")
+
+    def test_panel_del_negocio(self):
+        from cuentas.negocio import resumen_negocio
+        r = resumen_negocio()
+        self.assertEqual(r["n_clientes"], len(r["clientes"]))
+        self.assertEqual(r["mrr"], sum(f["mensual"] for f in r["clientes"]))
+        self.assertEqual(r["anual"], r["mrr"] * 12)
+        admin = Usuario.objects.create_superuser("jefe", "jefe@example.com", "x")
+        self.client.force_login(admin)
+        respuesta = self.client.get(reverse("admin:index"))
+        self.assertContains(respuesta, "Panel del negocio")
+        self.assertContains(respuesta, "Ingresos por plan")
+        for url in ("alertas_alerta", "analisis_analisis", "concesiones_concesionaria",
+                    "concesiones_concesion", "vuelos_vuelo", "cuentas_usuario"):
+            self.assertEqual(self.client.get(reverse(f"admin:{url}_changelist")).status_code, 200, url)

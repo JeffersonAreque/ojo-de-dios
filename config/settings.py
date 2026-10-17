@@ -17,6 +17,7 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    "django.contrib.humanize",
     "cuentas",
     "concesiones",
     "vuelos",
@@ -92,3 +93,7 @@ LOGOUT_REDIRECT_URL = "login"
 ANALISIS_AREA_MINIMA_M2 = float(os.getenv("ANALISIS_AREA_MINIMA_M2", "300"))
 # Perimetro alrededor de la concesion que tambien se vigila (metros)
 ANALISIS_MARGEN_M = float(os.getenv("ANALISIS_MARGEN_M", "500"))
+
+# Precio mensual de cada plan en soles (Guía 3: modelo de negocio).
+# Enterprise es "desde": se usa el precio base para estimar el ingreso.
+PRECIOS_PLAN = {"basico": 1500, "pro": 3000, "enterprise": 5500}

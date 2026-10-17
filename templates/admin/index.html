@@ -1,0 +1,86 @@
+{% extends "admin/base_site.html" %}
+{% load i18n static log panel humanize %}
+
+{% block coltype %}colM{% endblock %}
+{% block bodyclass %}{{ block.super }} tablero{% endblock %}
+{% block nav-breadcrumbs %}{% endblock %}
+{% block nav-sidebar %}{% endblock %}
+
+{% block content %}
+{% resumen_negocio as r %}
+<div id="content-main" class="tablero-cuerpo">
+
+  <section class="kpis">
+    <div class="kpi"><span class="valor">{{ r.n_clientes }}</span><span class="etq">Clientes activos</span></div>
+    <div class="kpi"><span class="valor">{{ r.hectareas|floatformat:"0g" }} <small>ha</small></span><span class="etq">Bosque vigilado en {{ r.n_concesiones }} concesi{{ r.n_concesiones|pluralize:"ón,ones" }}</span></div>
+    <div class="kpi destacado"><span class="valor">S/ {{ r.mrr|intcomma }}</span><span class="etq">Ingreso mensual · S/ {{ r.anual|intcomma }} al año</span></div>
+    <div class="kpi {% if r.pendientes %}alerta{% endif %}"><span class="valor">{{ r.pendientes }}</span><span class="etq">Alertas por revisar · {{ r.confirmadas }} confirmadas</span></div>
+  </section>
+
+  <div class="tablero-fila">
+    <section class="bloque clientes">
+      <header><h2>Clientes</h2><a href="{% url 'admin:concesiones_concesionaria_add' %}" class="accion">+ Nuevo cliente</a></header>
+      <table>
+        <thead><tr><th>Empresa</th><th>Plan</th><th class="num">Concesiones</th><th class="num">Hectáreas</th><th class="num">Alertas</th><th class="num">Mensualidad</th></tr></thead>
+        <tbody>
+        {% for f in r.clientes %}
+          <tr>
+            <td><a href="{% url 'admin:concesiones_concesionaria_change' f.cliente.pk %}">{{ f.cliente.razon_social }}</a><small>RUC {{ f.cliente.ruc }}</small></td>
+            <td><span class="plan plan-{{ f.plan_clave }}">{{ f.plan }}</span></td>
+            <td class="num">{{ f.concesiones }}</td>
+            <td class="num">{{ f.hectareas|floatformat:"1g" }}</td>
+            <td class="num">{{ f.alertas }}</td>
+            <td class="num fuerte">S/ {{ f.mensual|intcomma }}</td>
+          </tr>
+        {% empty %}
+          <tr><td colspan="6" class="vacio">Aún no hay clientes activos.</td></tr>
+        {% endfor %}
+        </tbody>
+      </table>
+    </section>
+
+    <section class="bloque planes">
+      <header><h2>Ingresos por plan</h2></header>
+      {% for p in r.planes %}
+      <div class="plan-fila">
+        <div class="plan-cab"><span class="plan plan-{{ p.clave }}">{{ p.nombre }}</span><span>S/ {{ p.precio|intcomma }}{% if p.clave == "enterprise" %}+{% endif %} / mes</span></div>
+        <div class="barra"><i class="b-{{ p.clave }}" style="width: {{ p.pct }}%"></i></div>
+        <div class="plan-pie"><span>{{ p.clientes }} cliente{{ p.clientes|pluralize }}</span><b>S/ {{ p.ingreso|intcomma }}</b></div>
+      </div>
+      {% endfor %}
+      <p class="nota">Precios de la Guía 3. Enterprise se cuenta con su precio base.</p>
+    </section>
+  </div>
+
+  <section class="bloque">
+    <header><h2>Datos del sistema</h2></header>
+    <div class="modulos">
+    {% for app in app_list %}{% for model in app.models %}
+      <div class="modulo">
+        <a href="{{ model.admin_url }}" class="modulo-nombre">{{ model.name }}</a>
+        <span class="modulo-app">{{ app.name }}</span>
+        {% if model.add_url %}<a href="{{ model.add_url }}" class="modulo-anadir" title="Añadir {{ model.name }}">+ Añadir</a>{% endif %}
+      </div>
+    {% endfor %}{% endfor %}
+    </div>
+  </section>
+
+  <section class="bloque">
+    <header><h2>Actividad reciente</h2></header>
+    {% get_admin_log 8 as admin_log for_user user %}
+    {% if not admin_log %}<p class="vacio">Todavía no hay cambios registrados.</p>{% else %}
+    <ul class="actividad">
+      {% for e in admin_log %}
+      <li class="{% if e.is_addition %}a-alta{% elif e.is_change %}a-cambio{% else %}a-baja{% endif %}">
+        <span class="que">{% if e.is_addition %}Creado{% elif e.is_change %}Modificado{% else %}Eliminado{% endif %}</span>
+        {% if e.is_deletion or not e.get_admin_url %}{{ e.object_repr }}{% else %}<a href="{{ e.get_admin_url }}">{{ e.object_repr }}</a>{% endif %}
+        <span class="tipo">{{ e.content_type.name|capfirst }}</span>
+        <time>{{ e.action_time|date:"d/m/Y H:i" }}</time>
+      </li>
+      {% endfor %}
+    </ul>{% endif %}
+  </section>
+</div>
+{% endblock %}
+
+{% block sidebar %}{% endblock %}
