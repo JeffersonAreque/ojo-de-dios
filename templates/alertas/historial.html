@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% block titulo %}Alertas{% endblock %}
+{% block contenido %}
+<div class="encabezado">
+  <div><h1>{% if user.es_concesionario %}Alertas de mis concesiones{% else %}Historial de alertas{% endif %}</h1>
+  <p>Registro de detecciones georreferenciadas, utilizable como evidencia ante ARFFS / SERFOR</p></div>
+  <a href="?{{ request.GET.urlencode }}&formato=csv" class="btn btn-outline-secondary"><i class="bi bi-download"></i> Exportar CSV</a>
+</div>
+<form method="get" class="row g-2 mb-3">
+  <div class="col-md-3"><select name="concesion" class="form-select" onchange="this.form.submit()"><option value="">Todas las concesiones</option>
+    {% for c in concesiones %}<option value="{{ c.pk }}" {% if filtros.concesion == c.pk|stringformat:"s" %}selected{% endif %}>{{ c.nombre }}</option>{% endfor %}</select></div>
+  {% if not user.es_concesionario %}
+  <div class="col-md-3"><select name="estado" class="form-select" onchange="this.form.submit()"><option value="">Todos los estados</option>
+    {% for v, t in estados %}<option value="{{ v }}" {% if filtros.estado == v %}selected{% endif %}>{{ t }}</option>{% endfor %}</select></div>
+  {% endif %}
+  <div class="col-md-3"><select name="gravedad" class="form-select" onchange="this.form.submit()"><option value="">Toda gravedad</option>
+    {% for v, t in gravedades %}<option value="{{ v }}" {% if filtros.gravedad == v %}selected{% endif %}>{{ t }}</option>{% endfor %}</select></div>
+</form>
+<div class="row g-3">
+  <div class="col-lg-7">
+    <div class="tarjeta p-0">
+      <table class="table table-hover mb-0">
+        <thead><tr><th>#</th><th>Detectada</th><th>Concesión</th><th>Tipo</th><th>Gravedad</th><th class="text-end">m²</th><th>Estado</th></tr></thead>
+        <tbody>
+        {% for a in alertas %}
+          <tr onclick="location='{% url 'alertas:detalle' a.pk %}'" style="cursor:pointer">
+            <td>{{ a.pk }}</td><td>{{ a.fecha_deteccion|date:"d/m/Y" }}</td><td>{{ a.concesion.nombre }}</td>
+            <td>{{ a.get_tipo_cambio_display }}{% if not a.dentro_concesion %}<br><small class="text-secondary">perímetro</small>{% endif %}</td>
+            <td><span class="insignia g-{{ a.gravedad }}">{{ a.get_gravedad_display }}</span></td>
+            <td class="text-end">{{ a.area_m2|floatformat:"0g" }}</td>
+            <td><span class="insignia e-{{ a.estado }}">{{ a.get_estado_display }}</span></td>
+          </tr>
+        {% empty %}<tr><td colspan="7" class="text-secondary p-3">No hay alertas con esos filtros.</td></tr>{% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+  <div class="col-lg-5"><div id="mapa" class="mapa"></div></div>
+</div>
+{{ mapa_alertas|json_script:"mapa-alertas" }}
+{% endblock %}
+{% block js %}<script>crearMapa("mapa");</script>{% endblock %}

@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+{% block titulo %}Registrar vuelo{% endblock %}
+{% block contenido %}
+<div class="encabezado"><div><h1>Registrar vuelo</h1><p>Sube el ortomosaico del vuelo con sus límites geográficos</p></div></div>
+<form method="post" enctype="multipart/form-data" class="row g-3">{% csrf_token %}
+  <div class="col-lg-5">
+    <div class="tarjeta mb-3">
+      <h2 class="h6 mb-3">1. Datos del vuelo</h2>
+      {% with form=vuelo_form %}{% include "_errores.html" %}{% endwith %}
+      {% for campo in vuelo_form %}{% include "_campo.html" %}{% endfor %}
+    </div>
+    <div class="tarjeta">
+      <h2 class="h6 mb-3">2. Imagen georreferenciada</h2>
+      {% with form=imagen_form %}{% include "_errores.html" %}{% endwith %}
+      {% include "_campo.html" with campo=imagen_form.archivo %}
+      {% include "_campo.html" with campo=imagen_form.fuente %}
+      <div class="row">
+        <div class="col-6">{% include "_campo.html" with campo=imagen_form.norte %}</div>
+        <div class="col-6">{% include "_campo.html" with campo=imagen_form.sur %}</div>
+        <div class="col-6">{% include "_campo.html" with campo=imagen_form.oeste %}</div>
+        <div class="col-6">{% include "_campo.html" with campo=imagen_form.este %}</div>
+      </div>
+      <button type="button" id="usar-caja" class="btn btn-sm btn-outline-secondary mb-3">Usar los límites de la concesión</button>
+      <button class="btn btn-bosque w-100">Guardar vuelo</button>
+    </div>
+  </div>
+  <div class="col-lg-7"><div id="mapa" class="mapa" style="height:600px"></div>
+    <small class="text-secondary">El rectángulo azul muestra el área que cubre la imagen.</small></div>
+</form>
+{{ cajas|json_script:"cajas" }}
+{{ mapa_concesiones|json_script:"mapa-concesiones" }}
+{% endblock %}
+{% block js %}
+<script>
+  const mapa = crearMapa("mapa");
+  const cajas = leerDatos("cajas");
+  const sel = document.getElementById("{{ vuelo_form.concesion.id_for_label }}");
+  const lados = ["norte", "sur", "este", "oeste"];
+  const campos = Object.fromEntries(lados.map((k) => [k, document.getElementById("id_img-" + k)]));
+  let rect = null;
+
+  function dibujar() {
+    const v = Object.fromEntries(lados.map((k) => [k, parseFloat(campos[k].value)]));
+    if (rect) rect.remove();
+    if (lados.every((k) => !isNaN(v[k]))) {
+      rect = L.rectangle([[v.sur, v.oeste], [v.norte, v.este]], { color: "#3388ff", weight: 2, fill: false }).addTo(mapa);
+      mapa.fitBounds(rect.getBounds(), { padding: [20, 20] });
+    }
+  }
+  document.getElementById("usar-caja").onclick = () => {
+    const caja = cajas[sel.value];
+    if (!caja) { alert("Primero elige la concesión."); return; }
+    lados.forEach((k) => (campos[k].value = caja[k]));
+    dibujar();
+  };
+  lados.forEach((k) => campos[k].addEventListener("change", dibujar));
+  dibujar();
+</script>
+{% endblock %}

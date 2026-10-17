@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% block titulo %}Concesiones{% endblock %}
+{% block contenido %}
+<div class="encabezado">
+  <div><h1>Concesiones</h1><p>Áreas bajo vigilancia en la zona de amortiguamiento de la RN Tambopata</p></div>
+  {% if user.es_analista %}
+  <div>
+    <a href="{% url 'concesiones:concesionarias' %}" class="btn btn-outline-secondary"><i class="bi bi-building"></i> Concesionarias</a>
+    <a href="{% url 'concesiones:nueva' %}" class="btn btn-bosque"><i class="bi bi-plus-lg"></i> Nueva concesión</a>
+  </div>
+  {% endif %}
+</div>
+<div class="row g-3">
+  <div class="col-lg-7">
+    <div class="tarjeta p-0">
+      <table class="table table-hover mb-0">
+        <thead><tr><th>Concesión</th><th>Titular</th><th>Tipo</th><th class="text-end">Área (ha)</th></tr></thead>
+        <tbody>
+        {% for c in concesiones %}
+          <tr onclick="location='{% url 'concesiones:detalle' c.pk %}'" style="cursor:pointer">
+            <td><b>{{ c.nombre }}</b><br><small class="text-secondary">{{ c.codigo_contrato }}</small></td>
+            <td>{{ c.concesionaria }}</td>
+            <td>{{ c.get_tipo_display }}</td>
+            <td class="text-end">{{ c.area_ha|floatformat:1 }}</td>
+          </tr>
+        {% empty %}
+          <tr><td colspan="4" class="text-secondary p-3">No hay concesiones registradas.</td></tr>
+        {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+  <div class="col-lg-5"><div id="mapa" class="mapa"></div></div>
+</div>
+{{ mapa_concesiones|json_script:"mapa-concesiones" }}
+{% endblock %}
+{% block js %}<script>crearMapa("mapa");</script>{% endblock %}

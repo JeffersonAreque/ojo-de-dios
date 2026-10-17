@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block titulo %}Concesionarias{% endblock %}
+{% block contenido %}
+<div class="encabezado"><div><h1>Concesionarias</h1><p>Empresas titulares (clientes B2B)</p></div></div>
+<div class="row g-3">
+  <div class="col-lg-4">
+    <form method="post" class="tarjeta">{% csrf_token %}
+      <h2 class="h6 mb-3">Registrar concesionaria</h2>
+      {% include "_errores.html" %}
+      {% for campo in form %}{% include "_campo.html" %}{% endfor %}
+      <button class="btn btn-bosque w-100">Guardar</button>
+    </form>
+  </div>
+  <div class="col-lg-8">
+    <div class="tarjeta p-0">
+      <table class="table mb-0">
+        <thead><tr><th>Razón social</th><th>RUC</th><th>Plan</th><th>Concesiones</th></tr></thead>
+        <tbody>
+        {% for c in concesionarias %}
+          <tr><td>{{ c.razon_social }}</td><td>{{ c.ruc }}</td><td>{{ c.get_plan_display }}</td><td>{{ c.concesiones.count }}</td></tr>
+        {% empty %}<tr><td colspan="4" class="text-secondary p-3">Sin registros.</td></tr>{% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock %}

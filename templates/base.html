@@ -1,0 +1,54 @@
+{% load static %}<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block titulo %}Ojo de Dios{% endblock %} · Vigilancia forestal</title>
+  <link rel="stylesheet" href="{% static 'vendor/bootstrap/bootstrap.min.css' %}">
+  <link rel="stylesheet" href="{% static 'vendor/bootstrap-icons/bootstrap-icons.min.css' %}">
+  <link rel="stylesheet" href="{% static 'vendor/leaflet/leaflet.css' %}">
+  {% block css %}{% endblock %}
+  <link rel="stylesheet" href="{% static 'css/app.css' %}">
+</head>
+<body>
+{% if user.is_authenticated %}
+  {% with seccion=request.resolver_match.app_name %}
+  <aside class="barra-lateral">
+    <a href="{% url 'inicio' %}" class="marca"><i class="bi bi-eye"></i> Ojo de Dios<small>Vigilancia forestal · Tambopata</small></a>
+    <nav class="nav flex-column mt-4">
+      <a class="nav-link {% if not seccion %}activo{% endif %}" href="{% url 'inicio' %}"><i class="bi bi-map"></i>Mapa general</a>
+      <a class="nav-link {% if seccion == 'alertas' %}activo{% endif %}" href="{% url 'alertas:historial' %}"><i class="bi bi-exclamation-triangle"></i>Alertas
+        {% if alertas_pendientes %}<span class="badge bg-warning text-dark ms-1">{{ alertas_pendientes }}</span>{% endif %}</a>
+      <a class="nav-link {% if seccion == 'concesiones' %}activo{% endif %}" href="{% url 'concesiones:lista' %}"><i class="bi bi-bounding-box"></i>Concesiones</a>
+      {% if not user.es_concesionario %}
+      <a class="nav-link {% if seccion == 'vuelos' %}activo{% endif %}" href="{% url 'vuelos:lista' %}"><i class="bi bi-airplane"></i>Vuelos</a>
+      <a class="nav-link {% if seccion == 'analisis' %}activo{% endif %}" href="{% url 'analisis:lista' %}"><i class="bi bi-layers"></i>Análisis</a>
+      {% endif %}
+      {% if user.is_superuser %}
+      <a class="nav-link" href="{% url 'admin:index' %}"><i class="bi bi-gear"></i>Administración</a>
+      {% endif %}
+    </nav>
+    <div class="usuario">
+      <div class="text-white">{{ user.get_full_name|default:user.username }}</div>
+      <div>{% if user.is_superuser %}Administrador{% else %}{{ user.get_rol_display }}{% endif %}</div>
+      <form method="post" action="{% url 'logout' %}" class="mt-2">{% csrf_token %}
+        <button class="btn btn-sm btn-outline-light"><i class="bi bi-box-arrow-left"></i> Salir</button>
+      </form>
+    </div>
+  </aside>
+  {% endwith %}
+  <main class="contenido">
+    {% for m in messages %}
+      <div class="alert alert-{% if m.tags == 'error' %}danger{% else %}{{ m.tags }}{% endif %} py-2">{{ m }}</div>
+    {% endfor %}
+    {% block contenido %}{% endblock %}
+  </main>
+{% else %}
+  {% block publico %}{% endblock %}
+{% endif %}
+<script src="{% static 'vendor/bootstrap/bootstrap.bundle.min.js' %}"></script>
+<script src="{% static 'vendor/leaflet/leaflet.js' %}"></script>
+<script src="{% static 'js/mapa.js' %}"></script>
+{% block js %}{% endblock %}
+</body>
+</html>

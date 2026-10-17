@@ -1,0 +1,61 @@
+:root {
+  --bosque: #1f4d2b;
+  --bosque-claro: #2e6b3c;
+  --fondo: #f4f6f2;
+  --borde: #dfe4dc;
+  --texto-suave: #5d6b5f;
+  --alta: #c0392b;
+  --media: #e67e22;
+  --baja: #d4ac0d;
+}
+
+body { background: var(--fondo); color: #1d2a20; font-size: .95rem; }
+
+.barra-lateral {
+  width: 230px; min-height: 100vh; background: var(--bosque); color: #e8f0e9;
+  position: fixed; top: 0; left: 0; padding: 1.25rem .9rem;
+}
+.barra-lateral .marca { font-weight: 700; font-size: 1.15rem; letter-spacing: .3px; color: #fff; text-decoration: none; }
+.barra-lateral .marca small { display: block; font-weight: 400; font-size: .75rem; color: #b7cbb9; }
+.barra-lateral .nav-link { color: #d3e2d5; border-radius: .4rem; padding: .5rem .7rem; margin-bottom: 2px; }
+.barra-lateral .nav-link:hover, .barra-lateral .nav-link.activo { background: rgba(255,255,255,.12); color: #fff; }
+.barra-lateral .nav-link i { width: 1.4rem; display: inline-block; }
+.barra-lateral .usuario { position: absolute; bottom: 1rem; left: .9rem; right: .9rem; font-size: .8rem; color: #b7cbb9; }
+
+.contenido { margin-left: 230px; padding: 1.5rem 2rem; }
+@media (max-width: 900px) {
+  .barra-lateral { position: static; width: 100%; min-height: auto; }
+  .barra-lateral .usuario { position: static; margin-top: 1rem; }
+  .contenido { margin-left: 0; padding: 1rem; }
+}
+
+.encabezado { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem; gap: 1rem; flex-wrap: wrap; }
+.encabezado h1 { font-size: 1.4rem; margin: 0; font-weight: 600; }
+.encabezado p { margin: 0; color: var(--texto-suave); }
+
+.tarjeta { background: #fff; border: 1px solid var(--borde); border-radius: .6rem; padding: 1.1rem; }
+.kpi .valor { font-size: 1.8rem; font-weight: 700; line-height: 1.1; }
+.kpi .etiqueta { color: var(--texto-suave); font-size: .82rem; }
+
+.mapa { height: 460px; border-radius: .6rem; border: 1px solid var(--borde); }
+.mapa.bajo { height: 340px; }
+
+.btn-bosque { background: var(--bosque-claro); color: #fff; border: none; }
+.btn-bosque:hover { background: var(--bosque); color: #fff; }
+
+.insignia { display: inline-block; padding: .15rem .5rem; border-radius: 1rem; font-size: .75rem; font-weight: 600; }
+.g-alta { background: #fbe3e0; color: var(--alta); }
+.g-media { background: #fdebd8; color: #b35d0f; }
+.g-baja { background: #fbf3d0; color: #8a6d00; }
+.e-pendiente { background: #e7ecf5; color: #34507a; }
+.e-confirmada { background: #fbe3e0; color: var(--alta); }
+.e-descartada { background: #eceeec; color: #6b726c; }
+
+.table > :not(caption) > * > * { padding: .55rem .6rem; }
+.table thead th { font-size: .78rem; text-transform: uppercase; color: var(--texto-suave); font-weight: 600; }
+
+.leyenda { background: #fff; padding: .5rem .7rem; border-radius: .4rem; font-size: .78rem; line-height: 1.6; box-shadow: 0 1px 4px rgba(0,0,0,.2); }
+.leyenda span { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 6px; }
+
+.login { max-width: 380px; margin: 10vh auto; }
+.evidencia img { width: 100%; border-radius: .4rem; border: 1px solid var(--borde); }

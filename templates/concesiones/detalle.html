@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% block titulo %}{{ concesion.nombre }}{% endblock %}
+{% block contenido %}
+<div class="encabezado">
+  <div>
+    <h1>{{ concesion.nombre }}</h1>
+    <p>{{ concesion.codigo_contrato }} · {{ concesion.get_tipo_display }} · {{ concesion.area_ha|floatformat:1 }} ha · {{ concesion.concesionaria }}</p>
+  </div>
+  <div>
+    {% if user.es_tecnico %}<a href="{% url 'vuelos:nuevo' %}?concesion={{ concesion.pk }}" class="btn btn-outline-secondary"><i class="bi bi-upload"></i> Registrar vuelo</a>{% endif %}
+    {% if user.es_tecnico or user.es_analista %}<a href="{% url 'analisis:nuevo' %}?concesion={{ concesion.pk }}" class="btn btn-bosque"><i class="bi bi-layers"></i> Analizar cambios</a>{% endif %}
+  </div>
+</div>
+<div class="row g-3">
+  <div class="col-lg-7"><div id="mapa" class="mapa"></div></div>
+  <div class="col-lg-5">
+    {% if not user.es_concesionario %}
+    <div class="tarjeta mb-3">
+      <h2 class="h6">Vuelos ({{ vuelos|length }})</h2>
+      {% for v in vuelos %}
+        <div class="border-bottom py-1"><a href="{% url 'vuelos:detalle' v.pk %}">{{ v.fecha_vuelo|date:"d/m/Y" }}</a> · {{ v.dron|default:"—" }} · {{ v.imagenes.all|length }} imagen(es)</div>
+      {% empty %}<p class="text-secondary mb-0">Aún no hay vuelos.</p>{% endfor %}
+    </div>
+    <div class="tarjeta mb-3">
+      <h2 class="h6">Análisis</h2>
+      {% for a in analisis %}
+        <div class="border-bottom py-1"><a href="{% url 'analisis:detalle' a.pk %}">{{ a.imagen_antes.vuelo.fecha_vuelo|date:"d/m/Y" }} → {{ a.imagen_despues.vuelo.fecha_vuelo|date:"d/m/Y" }}</a> · {{ a.area_perdida_m2|floatformat:"0g" }} m² perdidos</div>
+      {% empty %}<p class="text-secondary mb-0">Aún no hay análisis.</p>{% endfor %}
+    </div>
+    {% endif %}
+    <div class="tarjeta">
+      <h2 class="h6">Alertas</h2>
+      {% for a in alertas %}
+        <a href="{% url 'alertas:detalle' a.pk %}" class="d-block border-bottom py-1 text-reset text-decoration-none">
+          <span class="insignia g-{{ a.gravedad }}">{{ a.get_gravedad_display }}</span>
+          <span class="insignia e-{{ a.estado }}">{{ a.get_estado_display }}</span>
+          {{ a.get_tipo_cambio_display }} · {{ a.area_m2|floatformat:"0g" }} m²
+        </a>
+      {% empty %}<p class="text-secondary mb-0">Sin alertas.</p>{% endfor %}
+    </div>
+  </div>
+</div>
+{{ mapa_concesiones|json_script:"mapa-concesiones" }}
+{{ mapa_alertas|json_script:"mapa-alertas" }}
+{% endblock %}
+{% block js %}<script>crearMapa("mapa");</script>{% endblock %}

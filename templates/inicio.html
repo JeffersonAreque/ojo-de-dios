@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% block titulo %}Mapa general{% endblock %}
+{% block contenido %}
+<div class="encabezado">
+  <div>
+    <h1>Mapa de vigilancia</h1>
+    <p>{% if user.es_concesionario %}Alertas confirmadas en tus concesiones{% else %}Estado de todas las concesiones monitoreadas{% endif %}</p>
+  </div>
+</div>
+
+<div class="row g-3 mb-3">
+  <div class="col-6 col-lg-3"><div class="tarjeta kpi"><div class="valor">{{ concesiones|length }}</div><div class="etiqueta">Concesiones</div></div></div>
+  <div class="col-6 col-lg-3"><div class="tarjeta kpi"><div class="valor">{{ total_vuelos }}</div><div class="etiqueta">Vuelos registrados</div></div></div>
+  <div class="col-6 col-lg-3"><div class="tarjeta kpi"><div class="valor" style="color:var(--alta)">{{ conteo.confirmadas }}</div><div class="etiqueta">Alertas confirmadas ({{ conteo.altas }} de gravedad alta)</div></div></div>
+  {% if not user.es_concesionario %}
+  <div class="col-6 col-lg-3"><div class="tarjeta kpi"><div class="valor">{{ conteo.pendientes }}</div><div class="etiqueta">Pendientes de revisión</div></div></div>
+  {% endif %}
+</div>
+
+<div class="row g-3">
+  <div class="col-lg-8"><div id="mapa" class="mapa"></div></div>
+  <div class="col-lg-4">
+    <div class="tarjeta h-100">
+      <h2 class="h6 mb-3">Alertas recientes</h2>
+      {% for a in recientes %}
+        <a href="{% url 'alertas:detalle' a.pk %}" class="d-block text-decoration-none text-reset border-bottom py-2">
+          <span class="insignia g-{{ a.gravedad }}">{{ a.get_gravedad_display }}</span>
+          <span class="insignia e-{{ a.estado }}">{{ a.get_estado_display }}</span>
+          <div class="mt-1">{{ a.get_tipo_cambio_display }} · {{ a.area_m2|floatformat:"0g" }} m²</div>
+          <small class="text-secondary">{{ a.concesion.nombre }} · {{ a.fecha_deteccion|date:"d/m/Y" }}</small>
+        </a>
+      {% empty %}
+        <p class="text-secondary">Sin alertas por ahora.</p>
+      {% endfor %}
+    </div>
+  </div>
+</div>
+{{ mapa_concesiones|json_script:"mapa-concesiones" }}
+{{ mapa_alertas|json_script:"mapa-alertas" }}
+{% endblock %}
+{% block js %}<script>crearMapa("mapa");</script>{% endblock %}

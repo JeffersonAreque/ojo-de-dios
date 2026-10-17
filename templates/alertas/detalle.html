@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+{% load l10n %}
+{% block titulo %}Alerta {{ alerta.pk }}{% endblock %}
+{% block contenido %}
+<div class="encabezado">
+  <div><h1>Alerta #{{ alerta.pk }} · {{ alerta.get_tipo_cambio_display }}</h1>
+  <p><a href="{% url 'concesiones:detalle' alerta.concesion_id %}">{{ alerta.concesion.nombre }}</a> · detectada en el vuelo del {{ alerta.fecha_deteccion|date:"d/m/Y" }}</p></div>
+  <div><span class="insignia g-{{ alerta.gravedad }} fs-6">Gravedad {{ alerta.get_gravedad_display|lower }}</span>
+       <span class="insignia e-{{ alerta.estado }} fs-6">{{ alerta.get_estado_display }}</span></div>
+</div>
+<div class="row g-3">
+  <div class="col-lg-7"><div id="mapa" class="mapa"></div></div>
+  <div class="col-lg-5">
+    <div class="tarjeta mb-3">
+      <h2 class="h6">Datos de la detección</h2>
+      <table class="table table-sm mb-0">
+        <tr><th>Ubicación</th><td>{{ alerta.latitud|unlocalize }}, {{ alerta.longitud|unlocalize }}</td></tr>
+        <tr><th>Zona</th><td>{{ alerta.ubicacion_texto }}</td></tr>
+        <tr><th>Área afectada</th><td>{{ alerta.area_m2|floatformat:"0g" }} m² ({{ alerta.area_ha }} ha)</td></tr>
+        <tr><th>Comparación</th><td><a href="{% url 'analisis:detalle' alerta.analisis_id %}">{{ alerta.analisis.imagen_antes.vuelo.fecha_vuelo|date:"d/m/Y" }} → {{ alerta.fecha_deteccion|date:"d/m/Y" }}</a></td></tr>
+        {% if alerta.revisado_por %}
+        <tr><th>Revisado por</th><td>{{ alerta.revisado_por.get_full_name|default:alerta.revisado_por.username }} · {{ alerta.fecha_revision|date:"d/m/Y H:i" }}</td></tr>
+        {% if alerta.comentario %}<tr><th>Comentario</th><td>{{ alerta.comentario }}</td></tr>{% endif %}
+        {% endif %}
+      </table>
+      <a class="small" target="_blank" href="https://www.google.com/maps?q={{ alerta.latitud|unlocalize }},{{ alerta.longitud|unlocalize }}">Abrir coordenadas en Google Maps</a>
+    </div>
+
+    {% if user.es_analista and alerta.estado == "pendiente" %}
+    <form method="post" class="tarjeta border-warning">{% csrf_token %}
+      <h2 class="h6">Revisión del analista</h2>
+      <p class="small text-secondary">Revisa las imágenes. Si el cambio es una incursión real se confirma y se notifica al concesionario; si es sombra, nubosidad o error de imagen, se descarta.</p>
+      <textarea name="comentario" class="form-control mb-2" rows="2" placeholder="Comentario (opcional)"></textarea>
+      <div class="d-flex gap-2">
+        <button name="decision" value="confirmar" class="btn btn-danger flex-fill"><i class="bi bi-check-lg"></i> Confirmar alerta</button>
+        <button name="decision" value="descartar" class="btn btn-outline-secondary flex-fill"><i class="bi bi-x-lg"></i> Descartar</button>
+      </div>
+    </form>
+    {% endif %}
+  </div>
+</div>
+{{ mapa_concesiones|json_script:"mapa-concesiones" }}
+{{ mapa_alertas|json_script:"mapa-alertas" }}
+{{ mapa_imagenes|json_script:"mapa-imagenes" }}
+{% endblock %}
+{% block js %}<script>
+  crearMapa("mapa", { centro: [{{ alerta.latitud|unlocalize }}, {{ alerta.longitud|unlocalize }}], zoom: 16 });
+</script>{% endblock %}

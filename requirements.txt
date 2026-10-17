@@ -1,0 +1,6 @@
+Django>=5.2,<5.3
+psycopg[binary]>=3.2
+opencv-python-headless>=4.10
+numpy>=2.0
+Pillow>=10.4
+python-dotenv>=1.0

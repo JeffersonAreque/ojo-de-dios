@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% block titulo %}Análisis {{ analisis.pk }}{% endblock %}
+{% block contenido %}
+<div class="encabezado">
+  <div><h1>Análisis #{{ analisis.pk }}</h1>
+  <p><a href="{% url 'concesiones:detalle' analisis.concesion_id %}">{{ analisis.concesion.nombre }}</a> ·
+     {{ analisis.imagen_antes.vuelo.fecha_vuelo|date:"d/m/Y" }} → {{ analisis.imagen_despues.vuelo.fecha_vuelo|date:"d/m/Y" }}</p></div>
+</div>
+{% if analisis.estado == "error" %}
+  <div class="alert alert-danger">{{ analisis.mensaje }}</div>
+{% else %}
+<div class="row g-3 mb-3">
+  <div class="col-6 col-lg-3"><div class="tarjeta kpi"><div class="valor">{{ analisis.cobertura_antes_pct|floatformat:1 }}%</div><div class="etiqueta">Cobertura vegetal antes</div></div></div>
+  <div class="col-6 col-lg-3"><div class="tarjeta kpi"><div class="valor">{{ analisis.cobertura_despues_pct|floatformat:1 }}%</div><div class="etiqueta">Cobertura vegetal después</div></div></div>
+  <div class="col-6 col-lg-3"><div class="tarjeta kpi"><div class="valor" style="color:var(--alta)">{{ analisis.area_perdida_m2|floatformat:"0g" }}</div><div class="etiqueta">m² de pérdida detectada</div></div></div>
+  <div class="col-6 col-lg-3"><div class="tarjeta kpi"><div class="valor">{{ alertas|length }}</div><div class="etiqueta">Detecciones</div></div></div>
+</div>
+<div class="row g-3">
+  <div class="col-lg-7"><div id="mapa" class="mapa"></div></div>
+  <div class="col-lg-5">
+    <div class="tarjeta mb-3">
+      <h2 class="h6">Evidencia: antes / después / cambios</h2>
+      <div class="row g-2 evidencia">
+        <div class="col-4"><img src="{{ analisis.imagen_antes.archivo.url }}" alt="Antes"><small>Antes</small></div>
+        <div class="col-4"><img src="{{ analisis.imagen_despues.archivo.url }}" alt="Después"><small>Después</small></div>
+        <div class="col-4">{% if analisis.imagen_resultado %}<img src="{{ analisis.imagen_resultado.url }}" alt="Cambios"><small>Cambios</small>{% endif %}</div>
+      </div>
+    </div>
+    <div class="tarjeta p-0">
+      <table class="table table-hover mb-0">
+        <thead><tr><th>Tipo</th><th>Gravedad</th><th class="text-end">m²</th><th>Estado</th></tr></thead>
+        <tbody>
+        {% for a in alertas %}
+          <tr onclick="location='{% url 'alertas:detalle' a.pk %}'" style="cursor:pointer">
+            <td>{{ a.get_tipo_cambio_display }}</td>
+            <td><span class="insignia g-{{ a.gravedad }}">{{ a.get_gravedad_display }}</span></td>
+            <td class="text-end">{{ a.area_m2|floatformat:"0g" }}</td>
+            <td><span class="insignia e-{{ a.estado }}">{{ a.get_estado_display }}</span></td>
+          </tr>
+        {% empty %}<tr><td colspan="4" class="text-secondary p-3">No se detectaron cambios significativos.</td></tr>{% endfor %}
+        </tbody>
+      </table>
+    </div>
+    <small class="text-secondary d-block mt-2">{{ analisis.mensaje }}</small>
+  </div>
+</div>
+{% endif %}
+{{ mapa_concesiones|json_script:"mapa-concesiones" }}
+{{ mapa_alertas|json_script:"mapa-alertas" }}
+{{ mapa_imagenes|json_script:"mapa-imagenes" }}
+{% endblock %}
+{% block js %}{% if analisis.estado != "error" %}<script>crearMapa("mapa");</script>{% endif %}{% endblock %}

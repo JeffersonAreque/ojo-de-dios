@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% load l10n %}
+{% block titulo %}Vuelo {{ vuelo.fecha_vuelo|date:"d/m/Y" }}{% endblock %}
+{% block contenido %}
+<div class="encabezado">
+  <div><h1>Vuelo del {{ vuelo.fecha_vuelo|date:"d/m/Y" }}</h1>
+  <p><a href="{% url 'concesiones:detalle' vuelo.concesion_id %}">{{ vuelo.concesion.nombre }}</a> · {{ vuelo.dron|default:"dron no indicado" }}{% if vuelo.altitud_m %} · {{ vuelo.altitud_m }} m de altitud{% endif %}</p></div>
+  {% if user.es_tecnico or user.es_analista %}<a href="{% url 'analisis:nuevo' %}?concesion={{ vuelo.concesion_id }}" class="btn btn-bosque"><i class="bi bi-layers"></i> Analizar cambios</a>{% endif %}
+</div>
+<div class="row g-3">
+  <div class="col-lg-8"><div id="mapa" class="mapa"></div></div>
+  <div class="col-lg-4">
+    <div class="tarjeta">
+      <h2 class="h6">Datos del vuelo</h2>
+      <p class="mb-1">Operador: {{ vuelo.operador.get_full_name|default:vuelo.operador.username }}</p>
+      <p class="mb-3">Registrado: {{ vuelo.creado|date:"d/m/Y H:i" }}</p>
+      {% if vuelo.observaciones %}<p class="text-secondary">{{ vuelo.observaciones }}</p>{% endif %}
+      {% for i in imagenes %}
+        <div class="evidencia mb-2"><img src="{{ i.archivo.url }}" alt="Imagen del vuelo"></div>
+        <small class="text-secondary">{{ i.get_fuente_display }} · {{ i.ancho_px }}×{{ i.alto_px }} px<br>
+          N {{ i.norte|unlocalize }} · S {{ i.sur|unlocalize }} · E {{ i.este|unlocalize }} · O {{ i.oeste|unlocalize }}</small>
+      {% endfor %}
+    </div>
+  </div>
+</div>
+{{ mapa_concesiones|json_script:"mapa-concesiones" }}
+{{ mapa_imagenes|json_script:"mapa-imagenes" }}
+{% endblock %}
+{% block js %}<script>crearMapa("mapa");</script>{% endblock %}

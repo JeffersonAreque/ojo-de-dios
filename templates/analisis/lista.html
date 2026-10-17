@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block titulo %}Análisis{% endblock %}
+{% block contenido %}
+<div class="encabezado">
+  <div><h1>Análisis de cambio</h1><p>Comparaciones entre dos fechas de una misma concesión</p></div>
+  <a href="{% url 'analisis:nuevo' %}" class="btn btn-bosque"><i class="bi bi-plus-lg"></i> Nuevo análisis</a>
+</div>
+<div class="tarjeta p-0">
+  <table class="table table-hover mb-0">
+    <thead><tr><th>#</th><th>Concesión</th><th>Periodo</th><th>Cobertura</th><th class="text-end">Pérdida (m²)</th><th>Alertas</th><th>Ejecutado</th></tr></thead>
+    <tbody>
+    {% for a in lista %}
+      <tr onclick="location='{% url 'analisis:detalle' a.pk %}'" style="cursor:pointer">
+        <td>{{ a.pk }}</td><td>{{ a.concesion.nombre }}</td>
+        <td>{{ a.imagen_antes.vuelo.fecha_vuelo|date:"d/m/Y" }} → {{ a.imagen_despues.vuelo.fecha_vuelo|date:"d/m/Y" }}</td>
+        <td>{% if a.estado == "error" %}<span class="text-danger">Error</span>{% else %}{{ a.cobertura_antes_pct|floatformat:1 }}% → {{ a.cobertura_despues_pct|floatformat:1 }}%{% endif %}</td>
+        <td class="text-end">{{ a.area_perdida_m2|floatformat:"0g" }}</td>
+        <td>{{ a.alertas.count }}</td>
+        <td><small>{{ a.ejecutado|date:"d/m/Y H:i" }}<br>{{ a.ejecutado_por.username }}</small></td>
+      </tr>
+    {% empty %}<tr><td colspan="7" class="text-secondary p-3">Todavía no se ha ejecutado ningún análisis.</td></tr>{% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

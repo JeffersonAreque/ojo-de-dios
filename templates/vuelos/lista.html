@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block titulo %}Vuelos{% endblock %}
+{% block contenido %}
+<div class="encabezado">
+  <div><h1>Vuelos de monitoreo</h1><p>Imágenes capturadas por fecha y concesión</p></div>
+  <div class="d-flex gap-2">
+    <form method="get">
+      <select name="concesion" class="form-select" onchange="this.form.submit()">
+        <option value="">Todas las concesiones</option>
+        {% for c in concesiones %}<option value="{{ c.pk }}" {% if concesion_id == c.pk|stringformat:"s" %}selected{% endif %}>{{ c.nombre }}</option>{% endfor %}
+      </select>
+    </form>
+    {% if user.es_tecnico %}<a href="{% url 'vuelos:nuevo' %}" class="btn btn-bosque text-nowrap"><i class="bi bi-upload"></i> Registrar vuelo</a>{% endif %}
+  </div>
+</div>
+<div class="tarjeta p-0">
+  <table class="table table-hover mb-0">
+    <thead><tr><th>Fecha</th><th>Concesión</th><th>Dron / fuente</th><th>Operador</th><th>Imágenes</th></tr></thead>
+    <tbody>
+    {% for v in vuelos %}
+      <tr onclick="location='{% url 'vuelos:detalle' v.pk %}'" style="cursor:pointer">
+        <td><b>{{ v.fecha_vuelo|date:"d/m/Y" }}</b></td><td>{{ v.concesion.nombre }}</td>
+        <td>{{ v.dron|default:"—" }}</td><td>{{ v.operador.get_full_name|default:v.operador.username }}</td>
+        <td>{{ v.imagenes.all|length }}</td>
+      </tr>
+    {% empty %}<tr><td colspan="5" class="text-secondary p-3">No hay vuelos registrados.</td></tr>{% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

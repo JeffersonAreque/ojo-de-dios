@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block titulo %}Nuevo análisis{% endblock %}
+{% block contenido %}
+<div class="encabezado"><div><h1>Nuevo análisis de cambio</h1><p>Compara la cobertura vegetal de una concesión entre dos fechas</p></div></div>
+<div class="row"><div class="col-lg-6">
+<div class="tarjeta">
+  <form method="get" class="mb-3">
+    <label class="form-label">Concesión</label>
+    <select name="concesion" class="form-select" onchange="this.form.submit()">
+      <option value="">— Elige una concesión —</option>
+      {% for c in concesiones %}<option value="{{ c.pk }}" {% if concesion.pk == c.pk %}selected{% endif %}>{{ c.nombre }}</option>{% endfor %}
+    </select>
+  </form>
+  {% if form %}
+    {% if form.fields.imagen_antes.queryset.count < 2 %}
+      <div class="alert alert-warning">Esta concesión necesita al menos dos vuelos con imagen para poder comparar.
+        {% if user.es_tecnico %}<a href="{% url 'vuelos:nuevo' %}?concesion={{ concesion.pk }}">Registrar vuelo</a>{% endif %}</div>
+    {% else %}
+    <form method="post">{% csrf_token %}
+      <input type="hidden" name="concesion" value="{{ concesion.pk }}">
+      {% include "_errores.html" %}
+      {% for campo in form %}{% include "_campo.html" %}{% endfor %}
+      <div class="form-text mb-3">El sistema calcula el índice de verdor (ExG) en ambas imágenes, detecta las zonas donde se perdió vegetación y crea alertas <b>pendientes de revisión</b> para el analista.</div>
+      <button class="btn btn-bosque w-100" onclick="this.disabled=true;this.innerText='Analizando…';this.form.submit()"><i class="bi bi-play-fill"></i> Ejecutar análisis</button>
+    </form>
+    {% endif %}
+  {% endif %}
+</div>
+</div></div>
+{% endblock %}

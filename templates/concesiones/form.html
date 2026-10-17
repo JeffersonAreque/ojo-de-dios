@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+{% load static %}
+{% block titulo %}Nueva concesión{% endblock %}
+{% block css %}<link rel="stylesheet" href="{% static 'vendor/leaflet-draw/leaflet.draw.css' %}">{% endblock %}
+{% block contenido %}
+<div class="encabezado"><div><h1>Nueva concesión</h1><p>Completa los datos y dibuja el límite con la herramienta de polígono del mapa</p></div></div>
+<form method="post" class="row g-3">{% csrf_token %}
+  <div class="col-lg-4">
+    <div class="tarjeta">
+      {% include "_errores.html" %}
+      {% for campo in form.visible_fields %}{% include "_campo.html" %}{% endfor %}
+      {{ form.limite }}
+      {% for e in form.limite.errors %}<div class="alert alert-danger py-2">{{ e }}</div>{% endfor %}
+      <div id="area" class="text-secondary small mb-3">Límite: sin dibujar</div>
+      <button class="btn btn-bosque w-100">Guardar concesión</button>
+    </div>
+  </div>
+  <div class="col-lg-8"><div id="mapa" class="mapa" style="height:560px"></div></div>
+</form>
+{% endblock %}
+{% block js %}
+<script src="{% static 'vendor/leaflet-draw/leaflet.draw.js' %}"></script>
+<script>
+  const mapa = crearMapa("mapa", { centro: [-12.82, -69.28], zoom: 13 });
+  const dibujos = new L.FeatureGroup().addTo(mapa);
+  const campo = document.getElementById("{{ form.limite.id_for_label }}");
+  const aviso = document.getElementById("area");
+
+  mapa.addControl(new L.Control.Draw({
+    edit: { featureGroup: dibujos },
+    draw: { polygon: { allowIntersection: false, showArea: true }, polyline: false, rectangle: true,
+            circle: false, marker: false, circlemarker: false },
+  }));
+
+  function guardar(capa) {
+    const coords = capa.getLatLngs()[0].map((p) => [+p.lng.toFixed(6), +p.lat.toFixed(6)]);
+    campo.value = JSON.stringify(coords);
+    const ha = L.GeometryUtil.geodesicArea(capa.getLatLngs()[0]) / 10000;
+    aviso.textContent = `Límite: ${coords.length} vértices · ${ha.toFixed(1)} ha aprox.`;
+  }
+
+  if (campo.value) {
+    const capa = L.polygon(JSON.parse(campo.value).map(([lon, lat]) => [lat, lon])).addTo(dibujos);
+    guardar(capa);
+    mapa.fitBounds(capa.getBounds());
+  }
+  mapa.on(L.Draw.Event.CREATED, (e) => { dibujos.clearLayers(); dibujos.addLayer(e.layer); guardar(e.layer); });
+  mapa.on(L.Draw.Event.EDITED, (e) => e.layers.eachLayer(guardar));
+  mapa.on(L.Draw.Event.DELETED, () => { campo.value = ""; aviso.textContent = "Límite: sin dibujar"; });
+</script>
+{% endblock %}
