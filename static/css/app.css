@@ -183,3 +183,26 @@ h1, h2, h3, h4, h5, h6, .h4, .h6, .kpi .valor, .marca-nombre { font-family: "Bar
 
 /* Páginas de error y formularios centrados */
 .login { max-width: 420px; margin: 10vh auto; }
+
+/* ---------- Comparador deslizable antes / después ---------- */
+.comparador { position: relative; overflow: hidden; border-radius: 8px; margin-inline: auto; background: var(--dosel);
+  --corte: 50%; cursor: ew-resize; touch-action: none; user-select: none; }
+.comparador img { position: absolute; inset: 0; width: 100%; height: 100%; display: block; pointer-events: none; }
+.comparador .antes { clip-path: inset(0 calc(100% - var(--corte)) 0 0); }
+.comparador .capa { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
+.comparador .capa polygon { fill: none; stroke-width: 2; vector-effect: non-scaling-stroke; }
+.comparador .capa .limite { stroke: var(--limite); stroke-dasharray: 8 6; }
+.comparador .capa .z-alta { stroke: var(--alta); }
+.comparador .capa .z-media { stroke: var(--media); }
+.comparador .capa .z-baja { stroke: var(--baja); }
+.comparador.sin-zonas .zonas { display: none; }
+.comparador .corte { position: absolute; top: 0; bottom: 0; left: var(--corte); width: 2px; margin-left: -1px; background: var(--tinta); box-shadow: 0 0 6px rgba(0,0,0,.6); }
+.comparador .tirador { position: absolute; top: 50%; left: var(--corte); width: 40px; height: 40px; margin: -20px 0 0 -20px;
+  border-radius: 50%; background: var(--tinta); color: var(--fondo); display: grid; place-items: center; box-shadow: 0 2px 10px rgba(0,0,0,.5); }
+.comparador .tirador svg { width: 20px; }
+.comparador .et { position: absolute; top: .7rem; padding: .2rem .6rem; border-radius: 4px; background: rgba(13,24,19,.85);
+  font: 600 .85rem "Barlow SC", sans-serif; color: var(--tinta); pointer-events: none; }
+.comparador .et.i { left: .7rem; } .comparador .et.d { right: .7rem; }
+.comparador-pie { display: flex; justify-content: space-between; gap: 1rem; flex-wrap: wrap; padding: .55rem .4rem .15rem; font-size: .85rem; color: var(--tinta-suave); }
+.comparador-pie label { cursor: pointer; display: flex; align-items: center; gap: .4rem; }
+.comparador-pie input { accent-color: var(--hoja); }

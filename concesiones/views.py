@@ -6,6 +6,8 @@ from django.shortcuts import get_object_or_404, redirect, render
 
 from alertas.models import Alerta
 from alertas.views import alertas_geojson, alertas_visibles
+from analisis.comparador import preparar_comparacion
+from analisis.models import Analisis
 from cuentas.models import Usuario
 from cuentas.permisos import concesiones_visibles, rol_requerido
 
@@ -26,11 +28,14 @@ def lista(request):
 def detalle(request, pk):
     concesion = get_object_or_404(concesiones_visibles(request.user), pk=pk)
     alertas = alertas_visibles(request.user).filter(concesion=concesion).exclude(estado=Alerta.Estado.DESCARTADA)
+    ultimo = concesion.analisis.filter(estado=Analisis.Estado.COMPLETADO).select_related(
+        "imagen_antes__vuelo", "imagen_despues__vuelo").first()
     return render(request, "concesiones/detalle.html", {
         "concesion": concesion,
+        "comp": preparar_comparacion(ultimo, alertas.filter(analisis=ultimo)) if ultimo else None,
         "vuelos": concesion.vuelos.select_related("operador").prefetch_related("imagenes"),
         "analisis": concesion.analisis.select_related("imagen_antes__vuelo", "imagen_despues__vuelo")[:10],
-        "alertas": alertas[:20],
+        "alertas": alertas.order_by("-area_m2")[:20],
         "mapa_concesiones": [{"id": concesion.pk, "nombre": concesion.nombre, "limite": concesion.limite}],
         "mapa_alertas": alertas_geojson(alertas),
     })

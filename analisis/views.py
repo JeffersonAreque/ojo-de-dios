@@ -6,6 +6,7 @@ from alertas.views import alertas_geojson, alertas_visibles
 from cuentas.models import Usuario
 from cuentas.permisos import concesiones_visibles, rol_requerido
 
+from .comparador import preparar_comparacion
 from .forms import AnalisisForm
 from .models import Analisis
 from .servicio import ejecutar_analisis
@@ -50,6 +51,7 @@ def detalle(request, pk):
     c = analisis.concesion
     return render(request, "analisis/detalle.html", {
         "analisis": analisis,
+        "comp": preparar_comparacion(analisis, alertas),
         "alertas": alertas,
         "mapa_concesiones": [{"id": c.pk, "nombre": c.nombre, "limite": c.limite}],
         "mapa_alertas": alertas_geojson(alertas),

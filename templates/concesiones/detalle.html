@@ -12,7 +12,13 @@
   </div>
 </div>
 <div class="row g-3">
-  <div class="col-lg-7"><div id="mapa" class="mapa"></div></div>
+  <div class="col-lg-7">
+    <div id="mapa" class="mapa"></div>
+    {% if comp %}
+    <h2 class="h6 mt-4 mb-2 text-secondary text-uppercase" style="letter-spacing:.08em;font-size:.78rem">Último análisis: {{ comp.fecha_antes|date:"d/m/Y" }} → {{ comp.fecha_despues|date:"d/m/Y" }}</h2>
+    {% include "_comparador.html" %}
+    {% endif %}
+  </div>
   <div class="col-lg-5">
     {% if not user.es_concesionario %}
     <div class="tarjeta mb-3">

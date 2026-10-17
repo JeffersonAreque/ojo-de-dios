@@ -72,3 +72,27 @@ class FlujoAlertasTests(TestCase):
         self.entrar("tecnico")
         self.assertEqual(self.client.get(reverse("vuelos:nuevo")).status_code, 200)
         self.assertEqual(self.client.get(reverse("concesiones:nueva")).status_code, 403)
+
+    def test_comparador_recorta_las_dos_fechas_al_mismo_tamano(self):
+        from analisis.comparador import preparar_comparacion
+        from analisis.models import Analisis
+        from django.core.files.storage import default_storage
+        from PIL import Image
+
+        analisis = Analisis.objects.first()
+        comp = preparar_comparacion(analisis, Alerta.objects.filter(analisis=analisis))
+        self.assertIsNotNone(comp)
+        tamanos = set()
+        for clave in ("antes", "despues"):
+            nombre = f"analisis/comparar/{analisis.pk}_{clave}.jpg"
+            with default_storage.open(nombre) as f:
+                tamanos.add(Image.open(f).size)
+        self.assertEqual(tamanos, {(comp["ancho"], comp["alto"])})
+        self.assertEqual(len(comp["alertas"]), Alerta.objects.filter(analisis=analisis).count())
+
+    def test_paginas_muestran_el_comparador(self):
+        from analisis.models import Analisis
+        analisis = Analisis.objects.first()
+        self.entrar("analista")
+        self.assertContains(self.client.get(reverse("analisis:detalle", args=[analisis.pk])), "data-comparador")
+        self.assertContains(self.client.get(reverse("concesiones:detalle", args=[analisis.concesion_id])), "data-comparador")

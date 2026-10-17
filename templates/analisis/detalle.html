@@ -22,6 +22,8 @@
       <button type="button" class="btn btn-outline-secondary active" onclick="mostrarImagen(mapa, 0, this)">Ver después ({{ analisis.imagen_despues.vuelo.fecha_vuelo|date:"Y" }})</button>
     </div>
     <div id="mapa" class="mapa"></div>
+    <h2 class="h6 mt-4 mb-2 text-secondary text-uppercase" style="letter-spacing:.08em;font-size:.78rem">Comparar fechas</h2>
+    {% include "_comparador.html" %}
   </div>
   <div class="col-lg-5">
     <div class="tarjeta mb-3">

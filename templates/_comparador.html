@@ -1,0 +1,26 @@
+{% comment %}
+Comparador deslizable antes/despues. Recibe "comp" (ver analisis/comparador.py).
+Las dos imagenes estan recortadas a la misma zona, asi que coinciden punto por punto.
+{% endcomment %}
+{% if comp %}
+<div class="tarjeta p-2 comparador-tarjeta">
+  <div class="comparador" data-comparador style="aspect-ratio: {{ comp.ancho }} / {{ comp.alto }}; width: min(100%, calc(70vh * {{ comp.ancho }} / {{ comp.alto }}))">
+    <img src="{{ comp.despues }}" alt="Imagen de {{ comp.fecha_despues|date:'F Y' }}" draggable="false">
+    <img src="{{ comp.antes }}" class="antes" alt="Imagen de {{ comp.fecha_antes|date:'F Y' }}" draggable="false">
+    <svg class="capa" viewBox="0 0 {{ comp.ancho }} {{ comp.alto }}" preserveAspectRatio="none" aria-hidden="true">
+      <g class="zonas">{% for a in comp.alertas %}<polygon class="z-{{ a.gravedad }}" points="{{ a.puntos }}"/>{% endfor %}</g>
+      <polygon class="limite" points="{{ comp.limite }}"/>
+    </svg>
+    <div class="corte"></div>
+    <div class="tirador" role="slider" tabindex="0" aria-label="Deslizar para comparar fechas" aria-valuemin="0" aria-valuemax="100" aria-valuenow="50">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M9 6l-6 6 6 6M15 6l6 6-6 6"/></svg>
+    </div>
+    <span class="et i">{{ comp.fecha_antes|date:"F Y"|capfirst }}</span>
+    <span class="et d">{{ comp.fecha_despues|date:"F Y"|capfirst }}</span>
+  </div>
+  <div class="comparador-pie">
+    <span><i class="bi bi-arrows-expand-vertical"></i> Desliza para comparar las dos fechas</span>
+    <label><input type="checkbox" data-zonas checked> Mostrar zonas detectadas</label>
+  </div>
+</div>
+{% endif %}
