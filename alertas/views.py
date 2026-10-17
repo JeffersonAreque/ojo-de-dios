@@ -5,6 +5,7 @@ from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
+from django.utils import timezone
 
 from cuentas.permisos import concesiones_visibles
 
@@ -103,12 +104,16 @@ def detalle(request, pk):
 def _csv(alertas):
     respuesta = HttpResponse(content_type="text/csv; charset=utf-8")
     respuesta["Content-Disposition"] = 'attachment; filename="historial_alertas.csv"'
-    respuesta.write("﻿")
-    w = csv.writer(respuesta)
-    w.writerow(["id", "concesion", "fecha_deteccion", "tipo", "gravedad", "estado", "area_m2",
-                "latitud", "longitud", "ubicacion", "revisado_por", "fecha_revision", "comentario"])
+    # BOM + punto y coma: Excel en espanol abre el archivo directamente en columnas
+    respuesta.write("\ufeff")
+    w = csv.writer(respuesta, delimiter=";")
+    w.writerow(["N° alerta", "Concesión", "Fecha de detección", "Tipo de cambio", "Gravedad", "Estado",
+                "Área (ha)", "Latitud", "Longitud", "Ubicación", "Revisado por", "Fecha de revisión", "Comentario"])
     for a in alertas:
-        w.writerow([a.pk, a.concesion.nombre, a.fecha_deteccion, a.get_tipo_cambio_display(), a.get_gravedad_display(),
-                    a.get_estado_display(), a.area_m2, a.latitud, a.longitud, a.ubicacion_texto,
-                    a.revisado_por or "", a.fecha_revision or "", a.comentario])
+        revision = timezone.localtime(a.fecha_revision).strftime("%d/%m/%Y %H:%M") if a.fecha_revision else ""
+        revisor = (a.revisado_por.get_full_name() or a.revisado_por.username) if a.revisado_por else ""
+        w.writerow([a.pk, a.concesion.nombre, a.fecha_deteccion.strftime("%d/%m/%Y"), a.get_tipo_cambio_display(),
+                    a.get_gravedad_display(), a.get_estado_display(), str(a.area_ha).replace(".", ","),
+                    str(a.latitud).replace(".", ","), str(a.longitud).replace(".", ","),
+                    a.ubicacion_texto, revisor, revision, a.comentario])
     return respuesta
