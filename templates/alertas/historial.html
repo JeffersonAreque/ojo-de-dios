@@ -4,7 +4,7 @@
 <div class="encabezado">
   <div><h1>{% if user.es_concesionario %}Alertas de mis concesiones{% else %}Historial de alertas{% endif %}</h1>
   <p>Registro de detecciones georreferenciadas, utilizable como evidencia ante ARFFS / SERFOR</p></div>
-  <a href="?{{ request.GET.urlencode }}&formato=csv" class="btn btn-outline-secondary"><i class="bi bi-download"></i> Exportar CSV</a>
+  <a href="?{{ request.GET.urlencode }}&formato=excel" class="btn btn-outline-secondary"><i class="bi bi-file-earmark-excel"></i> Exportar a Excel</a>
 </div>
 <form method="get" class="row g-2 mb-3">
   <div class="col-md-3"><select name="concesion" class="form-select" onchange="this.form.submit()"><option value="">Todas las concesiones</option>

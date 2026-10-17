@@ -14,7 +14,7 @@ Técnico                     Sistema                              Analista      
   │                           │ compara con el vuelo anterior (ExG) │                          │
   │                           │ crea alertas "pendientes"  ────────►│ revisa evidencia         │
   │                           │                                     ├─ confirma ──────────────►│ ve la alerta en su mapa
-  │                           │                                     └─ descarta (no notifica)  │ + historial / CSV
+  │                           │                                     └─ descarta (no notifica)  │ + historial / Excel
 ```
 
 | Módulo | Qué incluye |
@@ -23,7 +23,7 @@ Técnico                     Sistema                              Analista      
 | Concesiones | Registro de concesionarias (RUC, plan SaaS) y concesiones con el polígono dibujado en el mapa; el área se calcula sola |
 | Vuelos | Registro del vuelo y de su imagen georreferenciada (JPG/PNG con límites, o GeoTIFF que se lee automáticamente) |
 | Análisis | Comparación entre dos fechas: índice de verdor ExG, pérdida de vegetación, zonas, área, tipo de cambio y gravedad |
-| Alertas | Revisión del analista (confirmar/descartar), mapa por gravedad, historial filtrable y exportación a CSV como evidencia |
+| Alertas | Revisión del analista (confirmar/descartar), mapa por gravedad, historial filtrable y exportación a Excel como evidencia |
 
 ### Cómo funciona el análisis (`analisis/detector.py`)
 
@@ -107,7 +107,7 @@ cuentas/       usuario con rol, permisos y mapa general
 concesiones/   concesionarias, concesiones, cálculos geográficos y comando cargar_demo
 vuelos/        vuelos e imágenes georreferenciadas (incluye lectura de GeoTIFF)
 analisis/      detector de cambios (OpenCV) y servicio que crea las alertas
-alertas/       revisión, historial, exportación CSV
+alertas/       revisión, historial, exportación a Excel
 templates/     pantallas
 static/        CSS, JS del mapa y librerías locales
 docs/          base de datos, guion de la demo, cómo obtener imágenes reales

@@ -12,7 +12,7 @@
 | 6 | cliente | Mapa general | "El concesionario **todavía no ve nada**: falta que el analista confirme." |
 | 7 | analista | Alertas → abrir la primera → Confirmar; descartar otra | "El analista valida con la evidencia. Si es sombra o nube, se descarta (flujo alternativo del CU-01)." |
 | 8 | cliente | Recargar el mapa general → abrir la alerta | "Ahora la ve: ubicación exacta, área, fecha y quién la validó." |
-| 9 | cliente | Alertas → Exportar CSV | "Historial exportable como sustento ante ARFFS/SERFOR." |
+| 9 | cliente | Alertas → Exportar a Excel | "Historial exportable como sustento ante ARFFS/SERFOR." |
 | 10 | — | (Opcional) `/admin` o pgAdmin | Mostrar las 7 tablas con los datos reales del flujo. |
 
 ## Preguntas probables

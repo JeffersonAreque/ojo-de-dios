@@ -1,11 +1,12 @@
-import csv
-
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
+from openpyxl import Workbook
+from openpyxl.styles import Alignment, Font, PatternFill
+from openpyxl.utils import get_column_letter
 
 from cuentas.permisos import concesiones_visibles
 
@@ -53,8 +54,8 @@ def historial(request):
 
     alertas = alertas.order_by("-analisis__ejecutado", "-area_m2")
 
-    if request.GET.get("formato") == "csv":
-        return _csv(alertas)
+    if request.GET.get("formato") == "excel":
+        return _excel(alertas)
 
     return render(request, "alertas/historial.html", {
         "alertas": alertas,
@@ -101,19 +102,40 @@ def detalle(request, pk):
     })
 
 
-def _csv(alertas):
-    respuesta = HttpResponse(content_type="text/csv; charset=utf-8")
-    respuesta["Content-Disposition"] = 'attachment; filename="historial_alertas.csv"'
-    # BOM + punto y coma: Excel en espanol abre el archivo directamente en columnas
-    respuesta.write("\ufeff")
-    w = csv.writer(respuesta, delimiter=";")
-    w.writerow(["N° alerta", "Concesión", "Fecha de detección", "Tipo de cambio", "Gravedad", "Estado",
-                "Área (ha)", "Latitud", "Longitud", "Ubicación", "Revisado por", "Fecha de revisión", "Comentario"])
+def _excel(alertas):
+    """Historial de alertas como libro de Excel (.xlsx), igual en cualquier configuracion regional."""
+    libro = Workbook()
+    hoja = libro.active
+    hoja.title = "Alertas"
+    columnas = [
+        ("N° alerta", 10), ("Concesión", 26), ("Fecha de detección", 18), ("Tipo de cambio", 28),
+        ("Gravedad", 11), ("Estado", 14), ("Área (ha)", 11), ("Latitud", 12), ("Longitud", 12),
+        ("Ubicación", 32), ("Revisado por", 16), ("Fecha de revisión", 18), ("Comentario", 60),
+    ]
+    hoja.append([nombre for nombre, _ in columnas])
+    for celda in hoja[1]:
+        celda.font = Font(bold=True, color="FFFFFF")
+        celda.fill = PatternFill("solid", fgColor="1F4D2B")
+        celda.alignment = Alignment(vertical="center")
+    for n, (_, ancho) in enumerate(columnas, start=1):
+        hoja.column_dimensions[get_column_letter(n)].width = ancho
+
     for a in alertas:
-        revision = timezone.localtime(a.fecha_revision).strftime("%d/%m/%Y %H:%M") if a.fecha_revision else ""
         revisor = (a.revisado_por.get_full_name() or a.revisado_por.username) if a.revisado_por else ""
-        w.writerow([a.pk, a.concesion.nombre, a.fecha_deteccion.strftime("%d/%m/%Y"), a.get_tipo_cambio_display(),
-                    a.get_gravedad_display(), a.get_estado_display(), str(a.area_ha).replace(".", ","),
-                    str(a.latitud).replace(".", ","), str(a.longitud).replace(".", ","),
-                    a.ubicacion_texto, revisor, revision, a.comentario])
+        revision = timezone.localtime(a.fecha_revision).replace(tzinfo=None) if a.fecha_revision else None
+        hoja.append([a.pk, a.concesion.nombre, a.fecha_deteccion, a.get_tipo_cambio_display(),
+                     a.get_gravedad_display(), a.get_estado_display(), a.area_ha, a.latitud, a.longitud,
+                     a.ubicacion_texto, revisor, revision, a.comentario])
+        fila = hoja.max_row
+        hoja.cell(fila, 3).number_format = "DD/MM/YYYY"
+        hoja.cell(fila, 7).number_format = "0.00"
+        hoja.cell(fila, 8).number_format = "0.000000"
+        hoja.cell(fila, 9).number_format = "0.000000"
+        hoja.cell(fila, 12).number_format = "DD/MM/YYYY HH:MM"
+    hoja.freeze_panes = "A2"
+    hoja.auto_filter.ref = hoja.dimensions
+
+    respuesta = HttpResponse(content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+    respuesta["Content-Disposition"] = f'attachment; filename="historial_alertas_{timezone.localdate():%Y%m%d}.xlsx"'
+    libro.save(respuesta)
     return respuesta
