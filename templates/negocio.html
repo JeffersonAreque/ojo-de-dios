@@ -24,7 +24,7 @@
           <tr>
             <td><a href="{% url 'admin:concesiones_concesionaria_change' f.cliente.pk %}" class="text-reset fw-semibold text-decoration-none">{{ f.cliente.razon_social }}</a><br><small class="text-secondary">RUC {{ f.cliente.ruc }}</small></td>
             <td><span class="insignia plan-{{ f.plan_clave }}">{{ f.plan }}</span></td>
-            <td class="text-end">{{ f.concesiones }}</td>
+            <td class="text-end">{% if f.concesiones %}{{ f.concesiones }}{% else %}<span class="insignia e-pendiente" title="Contrato firmado; aún sin concesiones registradas">En implementación</span>{% endif %}</td>
             <td class="text-end">{{ f.hectareas|floatformat:"1g" }}</td>
             <td class="text-end">{{ f.alertas }}</td>
             <td class="text-end fw-semibold" style="color:#8FD3AC">S/ {{ f.mensual|intcomma }}</td>

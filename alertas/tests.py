@@ -140,3 +140,14 @@ class FlujoAlertasTests(TestCase):
                             concesion=previo.concesion)
         self.assertFalse(form.is_valid())
         self.assertIn(f"Análisis #{previo.pk}", str(form.errors))
+
+    def test_preparar_demo_borra_lo_de_prueba(self):
+        from concesiones.models import Concesion
+        call_command("preparar_demo", stdout=StringIO())  # vista previa: no cambia nada
+        self.assertTrue(Concesion.objects.filter(codigo_contrato="17-TAM/C-ECO-DEMO-01").exists())
+        from unittest import mock
+        # Los archivos en disco no vuelven atras entre pruebas: aqui no se borran de verdad.
+        with mock.patch("concesiones.management.commands.preparar_demo.default_storage.delete"):
+            call_command("preparar_demo", "--confirmar", stdout=StringIO())
+        self.assertFalse(Concesion.objects.filter(codigo_contrato="17-TAM/C-ECO-DEMO-01").exists())
+        self.assertFalse(Usuario.objects.filter(username="cliente", is_active=True).exists())
