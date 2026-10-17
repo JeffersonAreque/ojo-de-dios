@@ -8,7 +8,8 @@ from alertas.models import Alerta
 from alertas.views import alertas_visibles, alertas_geojson
 from vuelos.models import Vuelo
 
-from .permisos import concesiones_visibles
+from .negocio import resumen_negocio
+from .permisos import concesiones_visibles, rol_requerido
 
 
 @login_required
@@ -31,3 +32,8 @@ def inicio(request):
         "mapa_alertas": alertas_geojson(alertas),
     }
     return render(request, "inicio.html", contexto)
+
+
+@rol_requerido()  # sin roles: solo el administrador (superusuario)
+def negocio(request):
+    return render(request, "negocio.html", {"r": resumen_negocio()})

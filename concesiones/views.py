@@ -2,6 +2,7 @@ import json
 
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+from django.db.models import Count, Max, Q
 from django.shortcuts import get_object_or_404, redirect, render
 
 from alertas.models import Alerta
@@ -17,28 +18,36 @@ from .models import Concesionaria
 
 @login_required
 def lista(request):
-    concesiones = concesiones_visibles(request.user)
-    return render(request, "concesiones/lista.html", {
-        "concesiones": concesiones,
-        "mapa_concesiones": [{"id": c.pk, "nombre": c.nombre, "limite": c.limite} for c in concesiones],
-    })
+    confirmadas = Count("alertas", filter=Q(alertas__estado=Alerta.Estado.CONFIRMADA), distinct=True)
+    concesiones = concesiones_visibles(request.user).annotate(
+        n_confirmadas=confirmadas,
+        ultimo_vuelo=Max("vuelos__fecha_vuelo"),
+    )
+    return render(request, "concesiones/lista.html", {"concesiones": concesiones})
 
 
 @login_required
 def detalle(request, pk):
     concesion = get_object_or_404(concesiones_visibles(request.user), pk=pk)
-    alertas = alertas_visibles(request.user).filter(concesion=concesion).exclude(estado=Alerta.Estado.DESCARTADA)
+    alertas = (alertas_visibles(request.user).filter(concesion=concesion)
+               .exclude(estado=Alerta.Estado.DESCARTADA).order_by("-area_m2"))
     ultimo = concesion.analisis.filter(estado=Analisis.Estado.COMPLETADO).select_related(
         "imagen_antes__vuelo", "imagen_despues__vuelo").first()
-    return render(request, "concesiones/detalle.html", {
+    comp = preparar_comparacion(ultimo, alertas.filter(analisis=ultimo)) if ultimo else None
+    contexto = {
         "concesion": concesion,
-        "comp": preparar_comparacion(ultimo, alertas.filter(analisis=ultimo)) if ultimo else None,
+        "ultimo": ultimo,
+        "comp": comp,
+        "alertas": alertas[:6],
+        "total_alertas": alertas.count(),
         "vuelos": concesion.vuelos.select_related("operador").prefetch_related("imagenes"),
-        "analisis": concesion.analisis.select_related("imagen_antes__vuelo", "imagen_despues__vuelo")[:10],
-        "alertas": alertas.order_by("-area_m2")[:20],
-        "mapa_concesiones": [{"id": concesion.pk, "nombre": concesion.nombre, "limite": concesion.limite}],
-        "mapa_alertas": alertas_geojson(alertas),
-    })
+        "analisis": concesion.analisis.select_related("imagen_antes__vuelo", "imagen_despues__vuelo")[:5],
+    }
+    if comp is None:
+        # Sin analisis todavia: el mapa sirve para ver donde esta la concesion.
+        contexto["mapa_concesiones"] = [{"id": concesion.pk, "nombre": concesion.nombre, "limite": concesion.limite}]
+        contexto["mapa_alertas"] = alertas_geojson(alertas)
+    return render(request, "concesiones/detalle.html", contexto)
 
 
 @rol_requerido(Usuario.Rol.ANALISTA)

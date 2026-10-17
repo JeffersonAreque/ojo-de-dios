@@ -10,11 +10,9 @@
   </div>
   {% endif %}
 </div>
-<div class="row g-3">
-  <div class="col-lg-7">
-    <div class="tarjeta p-0">
+<div class="tarjeta p-0">
       <table class="table table-hover mb-0">
-        <thead><tr><th>Concesión</th><th>Titular</th><th>Tipo</th><th class="text-end">Área (ha)</th></tr></thead>
+        <thead><tr><th>Concesión</th><th>Titular</th><th>Tipo</th><th class="text-end">Área (ha)</th><th>Última imagen</th><th class="text-end">Alertas confirmadas</th></tr></thead>
         <tbody>
         {% for c in concesiones %}
           <tr onclick="location='{% url 'concesiones:detalle' c.pk %}'" style="cursor:pointer">
@@ -22,16 +20,13 @@
             <td>{{ c.concesionaria }}</td>
             <td>{{ c.get_tipo_display }}</td>
             <td class="text-end">{{ c.area_ha|floatformat:1 }}</td>
+            <td>{{ c.ultimo_vuelo|date:"d/m/Y"|default:"—" }}</td>
+            <td class="text-end">{% if c.n_confirmadas %}<span class="insignia g-alta">{{ c.n_confirmadas }}</span>{% else %}<span class="text-secondary">0</span>{% endif %}</td>
           </tr>
         {% empty %}
-          <tr><td colspan="4" class="text-secondary p-3">No hay concesiones registradas.</td></tr>
+          <tr><td colspan="6" class="text-secondary p-3">No hay concesiones registradas.</td></tr>
         {% endfor %}
         </tbody>
       </table>
-    </div>
-  </div>
-  <div class="col-lg-5"><div id="mapa" class="mapa"></div></div>
 </div>
-{{ mapa_concesiones|json_script:"mapa-concesiones" }}
 {% endblock %}
-{% block js %}<script>crearMapa("mapa");</script>{% endblock %}

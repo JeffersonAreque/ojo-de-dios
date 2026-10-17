@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+{% load humanize %}
+{% block titulo %}Negocio{% endblock %}
+{% block contenido %}
+<div class="encabezado">
+  <div><h1>Panel del negocio</h1><p>Clientes, planes e ingresos de la plataforma</p></div>
+  <a href="{% url 'admin:concesiones_concesionaria_add' %}" class="btn btn-bosque"><i class="bi bi-plus-lg"></i> Nuevo cliente</a>
+</div>
+
+<div class="row g-3 mb-3">
+  <div class="col-6 col-xl-3"><div class="tarjeta kpi"><div class="valor">{{ r.n_clientes }}</div><div class="etiqueta">Clientes activos</div></div></div>
+  <div class="col-6 col-xl-3"><div class="tarjeta kpi"><div class="valor">{{ r.hectareas|floatformat:"0g" }} <small class="text-secondary fs-6">ha</small></div><div class="etiqueta">Bosque vigilado en {{ r.n_concesiones }} concesi{{ r.n_concesiones|pluralize:"ón,ones" }}</div></div></div>
+  <div class="col-6 col-xl-3"><div class="tarjeta kpi kpi-ingreso"><div class="valor">S/ {{ r.mrr|intcomma }}</div><div class="etiqueta">Ingreso mensual · S/ {{ r.anual|intcomma }} al año</div></div></div>
+  <div class="col-6 col-xl-3"><div class="tarjeta kpi"><div class="valor">{{ r.confirmadas }}</div><div class="etiqueta">Alertas entregadas a clientes · {{ r.pendientes }} por revisar</div></div></div>
+</div>
+
+<div class="row g-3">
+  <div class="col-xl-8">
+    <div class="tarjeta p-0">
+      <table class="table mb-0">
+        <thead><tr><th>Cliente</th><th>Plan</th><th class="text-end">Concesiones</th><th class="text-end">Hectáreas</th><th class="text-end">Alertas</th><th class="text-end">Mensualidad</th></tr></thead>
+        <tbody>
+        {% for f in r.clientes %}
+          <tr>
+            <td><a href="{% url 'admin:concesiones_concesionaria_change' f.cliente.pk %}" class="text-reset fw-semibold text-decoration-none">{{ f.cliente.razon_social }}</a><br><small class="text-secondary">RUC {{ f.cliente.ruc }}</small></td>
+            <td><span class="insignia plan-{{ f.plan_clave }}">{{ f.plan }}</span></td>
+            <td class="text-end">{{ f.concesiones }}</td>
+            <td class="text-end">{{ f.hectareas|floatformat:"1g" }}</td>
+            <td class="text-end">{{ f.alertas }}</td>
+            <td class="text-end fw-semibold" style="color:#8FD3AC">S/ {{ f.mensual|intcomma }}</td>
+          </tr>
+        {% empty %}<tr><td colspan="6" class="text-secondary p-3">Aún no hay clientes activos.</td></tr>{% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+  <div class="col-xl-4">
+    <div class="tarjeta">
+      <h2 class="h6">Ingresos por plan</h2>
+      {% for p in r.planes %}
+      <div class="plan-fila">
+        <div class="plan-cab"><span class="insignia plan-{{ p.clave }}">{{ p.nombre }}</span><span>S/ {{ p.precio|intcomma }}{% if p.clave == "enterprise" %}+{% endif %} / mes</span></div>
+        <div class="barra"><i class="b-{{ p.clave }}" style="width: {{ p.pct }}%"></i></div>
+        <div class="plan-cab"><span>{{ p.clientes }} cliente{{ p.clientes|pluralize }}</span><b>S/ {{ p.ingreso|intcomma }}</b></div>
+      </div>
+      {% endfor %}
+      <p class="text-secondary small mb-0 mt-2">Precios de la Guía 3. Enterprise se cuenta con su precio base.</p>
+    </div>
+  </div>
+</div>
+{% endblock %}

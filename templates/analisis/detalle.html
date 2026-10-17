@@ -16,33 +16,20 @@
   <div class="col-6 col-lg-3"><div class="tarjeta kpi"><div class="valor">{{ alertas|length }}</div><div class="etiqueta">Detecciones</div></div></div>
 </div>
 <div class="row g-3">
-  <div class="col-lg-7">
-    <div class="btn-group btn-group-sm mb-2" role="group">
-      <button type="button" class="btn btn-outline-secondary" onclick="mostrarImagen(mapa, 1, this)">Ver antes ({{ analisis.imagen_antes.vuelo.fecha_vuelo|date:"Y" }})</button>
-      <button type="button" class="btn btn-outline-secondary active" onclick="mostrarImagen(mapa, 0, this)">Ver después ({{ analisis.imagen_despues.vuelo.fecha_vuelo|date:"Y" }})</button>
-    </div>
-    <div id="mapa" class="mapa"></div>
-    <h2 class="h6 mt-4 mb-2 text-secondary text-uppercase" style="letter-spacing:.08em;font-size:.78rem">Comparar fechas</h2>
+  <div class="col-lg-8">
     {% include "_comparador.html" %}
+    {% if analisis.imagen_resultado %}<a href="{{ analisis.imagen_resultado.url }}" target="_blank" class="d-inline-block mt-2 small"><i class="bi bi-image"></i> Ver la imagen de cambios que generó el detector</a>{% endif %}
   </div>
-  <div class="col-lg-5">
-    <div class="tarjeta mb-3">
-      <h2 class="h6">Evidencia: antes / después / cambios</h2>
-      <div class="row g-2 evidencia">
-        <div class="col-4"><img src="{{ analisis.imagen_antes.archivo.url }}" alt="Antes"><small>Antes</small></div>
-        <div class="col-4"><img src="{{ analisis.imagen_despues.archivo.url }}" alt="Después"><small>Después</small></div>
-        <div class="col-4">{% if analisis.imagen_resultado %}<img src="{{ analisis.imagen_resultado.url }}" alt="Cambios"><small>Cambios</small>{% endif %}</div>
-      </div>
-    </div>
-    <div class="tarjeta p-0">
-      <table class="table table-hover mb-0">
-        <thead><tr><th>Tipo</th><th>Gravedad</th><th class="text-end">m²</th><th>Estado</th></tr></thead>
+  <div class="col-lg-4">
+    <div class="tarjeta p-0 lista-desplazable">
+      <table class="table table-hover table-sm mb-0">
+        <thead><tr><th>Tipo</th><th>Gravedad</th><th class="text-end">ha</th><th>Estado</th></tr></thead>
         <tbody>
         {% for a in alertas %}
           <tr onclick="location='{% url 'alertas:detalle' a.pk %}'" style="cursor:pointer">
             <td>{{ a.get_tipo_cambio_display }}</td>
             <td><span class="insignia g-{{ a.gravedad }}">{{ a.get_gravedad_display }}</span></td>
-            <td class="text-end">{{ a.area_m2|floatformat:"0g" }}</td>
+            <td class="text-end">{{ a.area_ha|floatformat:"2g" }}</td>
             <td><span class="insignia e-{{ a.estado }}">{{ a.get_estado_display }}</span></td>
           </tr>
         {% empty %}<tr><td colspan="4" class="text-secondary p-3">No se detectaron cambios significativos.</td></tr>{% endfor %}
@@ -53,8 +40,4 @@
   </div>
 </div>
 {% endif %}
-{{ mapa_concesiones|json_script:"mapa-concesiones" }}
-{{ mapa_alertas|json_script:"mapa-alertas" }}
-{{ mapa_imagenes|json_script:"mapa-imagenes" }}
 {% endblock %}
-{% block js %}{% if analisis.estado != "error" %}<script>const mapa = crearMapa("mapa");</script>{% endif %}{% endblock %}

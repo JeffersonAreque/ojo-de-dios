@@ -8,7 +8,7 @@
   <link rel="stylesheet" href="{% static 'vendor/bootstrap-icons/bootstrap-icons.min.css' %}">
   <link rel="stylesheet" href="{% static 'vendor/leaflet/leaflet.css' %}">
   {% block css %}{% endblock %}
-  <link rel="stylesheet" href="{% static 'css/app.css' %}?v=3">
+  <link rel="stylesheet" href="{% static 'css/app.css' %}?v=4">
 </head>
 <body>
 {% if user.is_authenticated %}
@@ -16,7 +16,7 @@
   <aside class="barra-lateral">
     <a href="{% url 'inicio' %}" class="marca">{% include "_logo.html" %}<span><span class="marca-nombre">Ojo de Dios</span><small>Vigilancia forestal</small></span></a>
     <nav class="nav flex-column mt-4">
-      <a class="nav-link {% if not seccion %}activo{% endif %}" href="{% url 'inicio' %}"><i class="bi bi-map"></i>Mapa general</a>
+      <a class="nav-link {% if not seccion and request.resolver_match.url_name == 'inicio' %}activo{% endif %}" href="{% url 'inicio' %}"><i class="bi bi-map"></i>Mapa general</a>
       <a class="nav-link {% if seccion == 'alertas' %}activo{% endif %}" href="{% url 'alertas:historial' %}"><i class="bi bi-exclamation-triangle"></i>Alertas
         {% if alertas_pendientes %}<span class="contador" title="Pendientes de revisión">{{ alertas_pendientes }}</span>{% endif %}</a>
       <a class="nav-link {% if seccion == 'concesiones' %}activo{% endif %}" href="{% url 'concesiones:lista' %}"><i class="bi bi-bounding-box"></i>Concesiones</a>
@@ -25,7 +25,8 @@
       <a class="nav-link {% if seccion == 'analisis' %}activo{% endif %}" href="{% url 'analisis:lista' %}"><i class="bi bi-layers"></i>Análisis</a>
       {% endif %}
       {% if user.is_superuser %}
-      <a class="nav-link" href="{% url 'admin:index' %}"><i class="bi bi-gear"></i>Administración</a>
+      <a class="nav-link {% if request.resolver_match.url_name == 'negocio' %}activo{% endif %}" href="{% url 'negocio' %}"><i class="bi bi-graph-up-arrow"></i>Negocio</a>
+      <a class="nav-link" href="{% url 'admin:index' %}"><i class="bi bi-database-gear"></i>Datos del sistema</a>
       {% endif %}
     </nav>
     <div class="usuario">
@@ -48,8 +49,8 @@
 {% endif %}
 <script src="{% static 'vendor/bootstrap/bootstrap.bundle.min.js' %}"></script>
 <script src="{% static 'vendor/leaflet/leaflet.js' %}"></script>
-<script src="{% static 'js/mapa.js' %}?v=3"></script>
-<script src="{% static 'js/comparador.js' %}?v=3" defer></script>
+<script src="{% static 'js/mapa.js' %}?v=4"></script>
+<script src="{% static 'js/comparador.js' %}?v=4" defer></script>
 {% block js %}{% endblock %}
 </body>
 </html>

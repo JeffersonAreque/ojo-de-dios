@@ -2,7 +2,7 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import get_object_or_404, redirect, render
 
-from alertas.views import alertas_geojson, alertas_visibles
+from alertas.views import alertas_visibles
 from cuentas.models import Usuario
 from cuentas.permisos import concesiones_visibles, rol_requerido
 
@@ -48,15 +48,8 @@ def nuevo(request):
 def detalle(request, pk):
     analisis = get_object_or_404(analisis_visibles(request.user), pk=pk)
     alertas = alertas_visibles(request.user).filter(analisis=analisis).order_by("-area_m2")
-    c = analisis.concesion
     return render(request, "analisis/detalle.html", {
         "analisis": analisis,
         "comp": preparar_comparacion(analisis, alertas),
         "alertas": alertas,
-        "mapa_concesiones": [{"id": c.pk, "nombre": c.nombre, "limite": c.limite}],
-        "mapa_alertas": alertas_geojson(alertas),
-        "mapa_imagenes": [
-            {"url": analisis.imagen_despues.archivo.url, "limites": analisis.imagen_despues.limites_leaflet, "nombre": "Después"},
-            {"url": analisis.imagen_antes.archivo.url, "limites": analisis.imagen_antes.limites_leaflet, "nombre": "Antes"},
-        ],
     })

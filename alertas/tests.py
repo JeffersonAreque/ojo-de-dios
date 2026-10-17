@@ -105,9 +105,15 @@ class FlujoAlertasTests(TestCase):
         self.assertEqual(r["anual"], r["mrr"] * 12)
         admin = Usuario.objects.create_superuser("jefe", "jefe@example.com", "x")
         self.client.force_login(admin)
-        respuesta = self.client.get(reverse("admin:index"))
+        respuesta = self.client.get(reverse("negocio"))
         self.assertContains(respuesta, "Panel del negocio")
         self.assertContains(respuesta, "Ingresos por plan")
+        self.assertContains(self.client.get(reverse("admin:index")), "Volver al sistema")
         for url in ("alertas_alerta", "analisis_analisis", "concesiones_concesionaria",
                     "concesiones_concesion", "vuelos_vuelo", "cuentas_usuario"):
             self.assertEqual(self.client.get(reverse(f"admin:{url}_changelist")).status_code, 200, url)
+
+    def test_solo_el_administrador_ve_el_negocio(self):
+        for usuario in ("analista", "tecnico", "cliente"):
+            self.entrar(usuario)
+            self.assertEqual(self.client.get(reverse("negocio")).status_code, 403, usuario)

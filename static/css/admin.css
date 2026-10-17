@@ -214,3 +214,14 @@ input[type=submit].default:hover, .submit-row input.default:hover { background: 
 .paginator { color: var(--tinta-suave); border-top-color: var(--linea); }
 .xfull, .xdate { }
 #content { padding: 24px 40px; }
+
+/* Salida siempre visible hacia el sistema */
+#site-name { display: flex; align-items: center; gap: 28px; }
+.volver { color: #07130D !important; background: var(--hoja); padding: 7px 14px; border-radius: 6px; font-weight: 600; font-size: .9rem; text-decoration: none; }
+.volver:hover { background: #62C08B; }
+.intro { color: var(--tinta-suave); margin: 0; }
+.intro a { font-weight: 600; }
+.tablero .tablero-fila { grid-template-columns: minmax(0, 1.6fr) minmax(280px, 1fr); }
+.tablero .modulos { grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); }
+.actividad li { grid-template-columns: 92px minmax(0, 1fr); }
+.actividad small { display: block; color: var(--tinta-suave); font-size: .78rem; }

@@ -206,3 +206,40 @@ h1, h2, h3, h4, h5, h6, .h4, .h6, .kpi .valor, .marca-nombre { font-family: "Bar
 .comparador-pie { display: flex; justify-content: space-between; gap: 1rem; flex-wrap: wrap; padding: .55rem .4rem .15rem; font-size: .85rem; color: var(--tinta-suave); }
 .comparador-pie label { cursor: pointer; display: flex; align-items: center; gap: .4rem; }
 .comparador-pie input { accent-color: var(--hoja); }
+
+/* ---------- Ficha de concesión ---------- */
+.resumen { display: grid; grid-template-columns: 1fr 1fr; gap: .9rem 1rem; }
+.resumen > div { border-left: 3px solid var(--linea); padding-left: .7rem; }
+.resumen .cifra { font-family: "Barlow SC", sans-serif; font-weight: 700; font-size: 1.8rem; line-height: 1; display: block; }
+.resumen small { color: var(--tinta-suave); font-size: .82rem; }
+.resumen .perdida { border-color: var(--alta); }
+.resumen .perdida .cifra { color: var(--alta); }
+.fila-alerta { display: grid; grid-template-columns: 10px 1fr auto; gap: .65rem; align-items: baseline; padding: .55rem 0;
+  border-top: 1px solid var(--linea); color: var(--tinta); text-decoration: none; }
+.fila-alerta:first-of-type { border-top: 0; }
+.fila-alerta:hover b { color: var(--hoja); }
+.fila-alerta b { font-weight: 600; display: block; }
+.fila-alerta small { color: var(--tinta-suave); font-size: .8rem; }
+.fila-alerta .ha { font-family: "Barlow SC", sans-serif; font-weight: 600; }
+.punto { width: 10px; height: 10px; border-radius: 50%; transform: translateY(1px); }
+.p-alta { background: var(--alta); } .p-media { background: var(--media); } .p-baja { background: var(--baja); }
+.fila-dato { display: flex; justify-content: space-between; gap: 1rem; padding: .4rem 0; border-top: 1px solid var(--linea); font-size: .9rem; }
+.fila-dato:first-of-type { border-top: 0; }
+.fila-dato span { color: var(--tinta-suave); }
+
+/* ---------- Panel del negocio ---------- */
+.kpi-ingreso { border-left-color: var(--hoja); }
+.kpi-ingreso .valor { color: #8FD3AC; }
+.plan-basico { color: #A9C3EA; border-color: rgba(120,160,220,.4); background: rgba(120,160,220,.12); }
+.plan-pro { color: #8FD3AC; border-color: rgba(79,176,122,.45); background: rgba(79,176,122,.14); }
+.plan-enterprise { color: #E3C48F; border-color: rgba(201,164,107,.5); background: rgba(201,164,107,.14); }
+.plan-fila { padding: .7rem 0; border-top: 1px solid var(--linea); }
+.plan-fila:first-of-type { border-top: 0; padding-top: 0; }
+.plan-cab { display: flex; justify-content: space-between; align-items: center; font-size: .85rem; color: var(--tinta-suave); }
+.plan-cab b { color: var(--tinta); }
+.barra { height: 8px; background: var(--superficie-2); border-radius: 4px; margin: .55rem 0 .45rem; overflow: hidden; }
+.barra i { display: block; height: 100%; border-radius: 4px; min-width: 2px; }
+.b-basico { background: #78A0DC; } .b-pro { background: var(--hoja); } .b-enterprise { background: var(--sedimento); }
+.lista-desplazable { max-height: calc(100vh - 330px); min-height: 300px; overflow-y: auto; }
+.lista-desplazable thead th { position: sticky; top: 0; background: var(--superficie); z-index: 1; }
+.lista-desplazable td { font-size: .88rem; }

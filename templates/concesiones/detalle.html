@@ -4,49 +4,67 @@
 <div class="encabezado">
   <div>
     <h1>{{ concesion.nombre }}</h1>
-    <p>{{ concesion.codigo_contrato }} · {{ concesion.get_tipo_display }} · {{ concesion.area_ha|floatformat:1 }} ha · {{ concesion.concesionaria }}</p>
+    <p>{{ concesion.concesionaria }} · {{ concesion.area_ha|floatformat:"1g" }} ha · {{ concesion.get_tipo_display }} · {{ concesion.codigo_contrato }}</p>
   </div>
-  <div>
+  <div class="d-flex gap-2">
     {% if user.es_tecnico %}<a href="{% url 'vuelos:nuevo' %}?concesion={{ concesion.pk }}" class="btn btn-outline-secondary"><i class="bi bi-upload"></i> Registrar vuelo</a>{% endif %}
     {% if user.es_tecnico or user.es_analista %}<a href="{% url 'analisis:nuevo' %}?concesion={{ concesion.pk }}" class="btn btn-bosque"><i class="bi bi-layers"></i> Analizar cambios</a>{% endif %}
   </div>
 </div>
+
 <div class="row g-3">
-  <div class="col-lg-7">
-    <div id="mapa" class="mapa"></div>
+  <div class="col-lg-8">
     {% if comp %}
-    <h2 class="h6 mt-4 mb-2 text-secondary text-uppercase" style="letter-spacing:.08em;font-size:.78rem">Último análisis: {{ comp.fecha_antes|date:"d/m/Y" }} → {{ comp.fecha_despues|date:"d/m/Y" }}</h2>
-    {% include "_comparador.html" %}
+      {% include "_comparador.html" %}
+    {% else %}
+      <div id="mapa" class="mapa"></div>
+      <p class="text-secondary small mt-2">Aún no hay un análisis de esta concesión. Cuando se compare un vuelo nuevo con uno anterior, aquí aparecerá el comparador de fechas.</p>
     {% endif %}
   </div>
-  <div class="col-lg-5">
-    {% if not user.es_concesionario %}
-    <div class="tarjeta mb-3">
-      <h2 class="h6">Vuelos ({{ vuelos|length }})</h2>
-      {% for v in vuelos %}
-        <div class="border-bottom py-1"><a href="{% url 'vuelos:detalle' v.pk %}">{{ v.fecha_vuelo|date:"d/m/Y" }}</a> · {{ v.dron|default:"—" }} · {{ v.imagenes.all|length }} imagen(es)</div>
-      {% empty %}<p class="text-secondary mb-0">Aún no hay vuelos.</p>{% endfor %}
-    </div>
-    <div class="tarjeta mb-3">
-      <h2 class="h6">Análisis</h2>
-      {% for a in analisis %}
-        <div class="border-bottom py-1"><a href="{% url 'analisis:detalle' a.pk %}">{{ a.imagen_antes.vuelo.fecha_vuelo|date:"d/m/Y" }} → {{ a.imagen_despues.vuelo.fecha_vuelo|date:"d/m/Y" }}</a> · {{ a.area_perdida_ha|floatformat:"1g" }} ha perdidas</div>
-      {% empty %}<p class="text-secondary mb-0">Aún no hay análisis.</p>{% endfor %}
+
+  <div class="col-lg-4 d-flex flex-column gap-3">
+    {% if ultimo %}
+    <div class="tarjeta">
+      <h2 class="h6">Cambio entre {{ ultimo.imagen_antes.vuelo.fecha_vuelo|date:"F Y" }} y {{ ultimo.imagen_despues.vuelo.fecha_vuelo|date:"F Y" }}</h2>
+      <div class="resumen">
+        <div class="perdida"><span class="cifra">{{ ultimo.area_perdida_ha|floatformat:"0g" }} ha</span><small>de bosque perdido</small></div>
+        <div><span class="cifra">{{ total_alertas }}</span><small>zona{{ total_alertas|pluralize }} {% if user.es_concesionario %}confirmada{{ total_alertas|pluralize }}{% else %}detectada{{ total_alertas|pluralize }}{% endif %}</small></div>
+        <div><span class="cifra">{{ ultimo.cobertura_antes_pct|floatformat:0 }} %</span><small>cobertura en {{ ultimo.imagen_antes.vuelo.fecha_vuelo|date:"Y" }}</small></div>
+        <div><span class="cifra">{{ ultimo.cobertura_despues_pct|floatformat:0 }} %</span><small>cobertura en {{ ultimo.imagen_despues.vuelo.fecha_vuelo|date:"Y" }}</small></div>
+      </div>
     </div>
     {% endif %}
+
     <div class="tarjeta">
-      <h2 class="h6">Alertas</h2>
+      <h2 class="h6">Alertas principales</h2>
       {% for a in alertas %}
-        <a href="{% url 'alertas:detalle' a.pk %}" class="d-block border-bottom py-1 text-reset text-decoration-none">
-          <span class="insignia g-{{ a.gravedad }}">{{ a.get_gravedad_display }}</span>
-          <span class="insignia e-{{ a.estado }}">{{ a.get_estado_display }}</span>
-          {{ a.get_tipo_cambio_display }} · {{ a.area_m2|floatformat:"0g" }} m²
+        <a href="{% url 'alertas:detalle' a.pk %}" class="fila-alerta">
+          <span class="punto p-{{ a.gravedad }}"></span>
+          <span><b>{{ a.get_tipo_cambio_display }}</b><small>{% if a.dentro_concesion %}Dentro de la concesión{% else %}Perímetro{% endif %} · {{ a.get_estado_display }}</small></span>
+          <span class="ha">{{ a.area_ha|floatformat:"1g" }} ha</span>
         </a>
       {% empty %}<p class="text-secondary mb-0">Sin alertas.</p>{% endfor %}
+      {% if total_alertas > alertas|length %}
+        <a href="{% url 'alertas:historial' %}?concesion={{ concesion.pk }}" class="d-block mt-2 small">Ver las {{ total_alertas }} alertas →</a>
+      {% endif %}
     </div>
+
+    {% if not user.es_concesionario %}
+    <div class="tarjeta">
+      <h2 class="h6">Vuelos y análisis</h2>
+      {% for v in vuelos %}
+        <div class="fila-dato"><a href="{% url 'vuelos:detalle' v.pk %}">{{ v.fecha_vuelo|date:"d/m/Y" }}</a><span>{{ v.dron|default:"—" }}</span></div>
+      {% empty %}<p class="text-secondary mb-0">Aún no hay vuelos.</p>{% endfor %}
+      {% for a in analisis %}
+        <div class="fila-dato"><a href="{% url 'analisis:detalle' a.pk %}">Análisis #{{ a.pk }}</a><span>{{ a.area_perdida_ha|floatformat:"1g" }} ha perdidas</span></div>
+      {% endfor %}
+    </div>
+    {% endif %}
   </div>
 </div>
+{% if not comp %}
 {{ mapa_concesiones|json_script:"mapa-concesiones" }}
 {{ mapa_alertas|json_script:"mapa-alertas" }}
+{% endif %}
 {% endblock %}
-{% block js %}<script>crearMapa("mapa");</script>{% endblock %}
+{% block js %}{% if not comp %}<script>crearMapa("mapa");</script>{% endif %}{% endblock %}

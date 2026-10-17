@@ -63,7 +63,6 @@ def historial(request):
         "concesiones": concesiones_visibles(request.user),
         "estados": Alerta.Estado.choices,
         "gravedades": Alerta.Gravedad.choices,
-        "mapa_alertas": alertas_geojson(alertas),
     })
 
 

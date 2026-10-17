@@ -16,27 +16,22 @@
   <div class="col-md-3"><select name="gravedad" class="form-select" onchange="this.form.submit()"><option value="">Toda gravedad</option>
     {% for v, t in gravedades %}<option value="{{ v }}" {% if filtros.gravedad == v %}selected{% endif %}>{{ t }}</option>{% endfor %}</select></div>
 </form>
-<div class="row g-3">
-  <div class="col-lg-7">
-    <div class="tarjeta p-0">
+<div class="tarjeta p-0">
       <table class="table table-hover mb-0">
-        <thead><tr><th>#</th><th>Detectada</th><th>Concesión</th><th>Tipo</th><th>Gravedad</th><th class="text-end">m²</th><th>Estado</th></tr></thead>
+        <thead><tr><th>#</th><th>Detectada</th><th>Concesión</th><th>Tipo</th><th>Ubicación</th><th>Gravedad</th><th class="text-end">Hectáreas</th><th>Estado</th></tr></thead>
         <tbody>
         {% for a in alertas %}
           <tr onclick="location='{% url 'alertas:detalle' a.pk %}'" style="cursor:pointer">
             <td>{{ a.pk }}</td><td>{{ a.fecha_deteccion|date:"d/m/Y" }}</td><td>{{ a.concesion.nombre }}</td>
-            <td>{{ a.get_tipo_cambio_display }}{% if not a.dentro_concesion %}<br><small class="text-secondary">perímetro</small>{% endif %}</td>
+            <td>{{ a.get_tipo_cambio_display }}</td>
+            <td class="text-secondary">{% if a.dentro_concesion %}Dentro{% else %}Perímetro{% endif %}</td>
             <td><span class="insignia g-{{ a.gravedad }}">{{ a.get_gravedad_display }}</span></td>
-            <td class="text-end">{{ a.area_m2|floatformat:"0g" }}</td>
+            <td class="text-end">{{ a.area_ha|floatformat:"2g" }}</td>
             <td><span class="insignia e-{{ a.estado }}">{{ a.get_estado_display }}</span></td>
           </tr>
-        {% empty %}<tr><td colspan="7" class="text-secondary p-3">No hay alertas con esos filtros.</td></tr>{% endfor %}
+        {% empty %}<tr><td colspan="8" class="text-secondary p-3">No hay alertas con esos filtros.</td></tr>{% endfor %}
         </tbody>
       </table>
-    </div>
-  </div>
-  <div class="col-lg-5"><div id="mapa" class="mapa"></div></div>
 </div>
-{{ mapa_alertas|json_script:"mapa-alertas" }}
+<p class="text-secondary small mt-2 mb-0">{{ alertas|length }} alerta{{ alertas|length|pluralize }}. Para verlas en el mapa usa el <a href="{% url 'inicio' %}">mapa general</a>; cada alerta abre su ubicación exacta.</p>
 {% endblock %}
-{% block js %}<script>crearMapa("mapa");</script>{% endblock %}

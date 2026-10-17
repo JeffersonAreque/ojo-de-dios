@@ -7,12 +7,13 @@
 {% block dark-mode-vars %}{% endblock %}
 
 {% block extrastyle %}
-<link rel="stylesheet" href="{% static 'css/admin.css' %}?v=3">
+<link rel="stylesheet" href="{% static 'css/admin.css' %}?v=4">
 {% endblock %}
 
 {% block branding %}
 <div id="site-name">
-  <a href="{% url 'admin:index' %}" class="marca-admin">{% include "_logo.html" %}<span>Ojo de Dios<small>Administración</small></span></a>
+  <a href="{% url 'admin:index' %}" class="marca-admin">{% include "_logo.html" %}<span>Ojo de Dios<small>Datos del sistema</small></span></a>
+  <a href="{% url 'inicio' %}" class="volver">← Volver al sistema</a>
 </div>
 {% endblock %}
 
