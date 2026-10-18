@@ -70,11 +70,7 @@ h1, h2, h3, h4, h5, h6, .h4, .h6, .kpi .valor, .marca-nombre { font-family: "Bar
 .barra-lateral .usuario b { display: block; color: var(--tinta); font-weight: 600; }
 
 .contenido { margin-left: 230px; padding: 1.5rem 2rem; }
-@media (max-width: 900px) {
-  .barra-lateral { position: static; width: 100%; min-height: auto; }
-  .barra-lateral .usuario { position: static; margin-top: 1rem; }
-  .contenido { margin-left: 0; padding: 1rem; }
-}
+
 
 /* ---------- Encabezados y tarjetas ---------- */
 .encabezado { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 1.25rem; gap: 1rem; flex-wrap: wrap; }
@@ -246,3 +242,53 @@ h1, h2, h3, h4, h5, h6, .h4, .h6, .kpi .valor, .marca-nombre { font-family: "Bar
 .dropdown-menu { --bs-dropdown-bg: var(--superficie); --bs-dropdown-border-color: var(--linea); --bs-dropdown-link-color: var(--tinta);
   --bs-dropdown-link-hover-bg: var(--superficie-2); --bs-dropdown-link-hover-color: var(--tinta); --bs-dropdown-link-active-bg: var(--hoja); }
 .dropdown-item { padding: .5rem 1rem; white-space: normal; min-width: 240px; }
+
+
+.solo-movil { display: none; }
+
+/* ================= Celular: barra superior + navegación inferior, como una app ================= */
+@media (max-width: 900px) {
+  .solo-escritorio { display: none !important; }
+  .solo-movil { display: block; }
+  .barra-lateral { position: fixed; inset: 0 0 auto 0; width: auto; min-height: 0; height: 56px; padding: 0 12px;
+    display: flex; align-items: center; justify-content: space-between; z-index: 1030; border-right: 0; border-bottom: 1px solid var(--linea);
+    padding-top: env(safe-area-inset-top); }
+  .marca svg { width: 32px; height: 32px; }
+  .marca-nombre { font-size: 1.1rem; }
+  .marca small { display: none; }
+  .barra-lateral .usuario { position: static; display: flex; align-items: center; gap: .5rem; }
+  .barra-lateral .usuario > b, .barra-lateral .usuario > div:not(.d-flex) { display: none; }
+  .barra-lateral .usuario .d-flex { margin-top: 0 !important; }
+  .etq-salir { display: none; }
+
+  .barra-lateral nav { position: fixed; left: 0; right: 0; bottom: 0; margin: 0 !important; z-index: 1030;
+    flex-direction: row !important; flex-wrap: nowrap; justify-content: space-around;
+    background: var(--dosel); border-top: 1px solid var(--linea); padding: 6px 4px calc(6px + env(safe-area-inset-bottom)); }
+  .barra-lateral .nav-link { flex: 1 1 0; flex-direction: column; gap: 2px; margin: 0; padding: 6px 2px; font-size: .68rem;
+    text-align: center; position: relative; min-width: 0; }
+  .barra-lateral .nav-link i { width: auto; font-size: 1.25rem; line-height: 1; }
+  .barra-lateral .nav-link.activo { box-shadow: inset 0 2px 0 var(--sedimento); background: transparent; color: var(--tinta); }
+  .barra-lateral .nav-link .etq { font-size: 0; }
+  .barra-lateral .nav-link .etq::after { content: attr(data-corto); font-size: .68rem; white-space: nowrap; }
+  .barra-lateral .contador { position: absolute; top: 2px; left: 55%; margin: 0; font-size: .62rem; padding: 0 .35rem; }
+
+  .contenido { margin-left: 0; padding: 72px 14px calc(84px + env(safe-area-inset-bottom)); }
+  .encabezado h1 { font-size: 1.55rem; }
+  .encabezado { align-items: flex-start; }
+  .kpi .valor { font-size: 1.6rem; }
+  .mapa { height: 340px; }
+  .buscador input { width: 130px; font-size: .78rem; padding: .35rem .55rem; }
+  .ingreso .vista { min-height: 30vh !important; }
+  .ingreso .lema p { font-size: 1.35rem; }
+  .ingreso .lema small, .ingreso .coord.b { display: none; }
+  .ingreso .acceso { padding-top: 1.5rem; }
+  .ingreso .acceso .marca { margin-bottom: 1.25rem; }
+  .ingreso .acceso h1 { font-size: 1.6rem; }
+  .encabezado > div:last-child:not(:first-child), .encabezado > a { width: 100%; }
+  .leaflet-control-layers-toggle { width: 36px !important; height: 36px !important; }
+  .leyenda { font-size: .72rem; }
+  .tarjeta.p-0 { overflow-x: auto; }
+  .col-opc { display: none; }
+  .table { font-size: .88rem; }
+  .comparador .tirador { width: 46px; height: 46px; margin: -23px 0 0 -23px; }
+}

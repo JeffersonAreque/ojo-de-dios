@@ -1,0 +1,17 @@
+{% load static %}<!doctype html>
+<html lang="es" data-bs-theme="dark">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Sin conexión · Ojo de Dios</title>
+  <link rel="stylesheet" href="{% static 'vendor/bootstrap/bootstrap.min.css' %}">
+  <link rel="stylesheet" href="{% static 'css/app.css' %}">
+</head>
+<body>
+  <div class="login text-center px-3">
+    <div class="marca justify-content-center mb-4">{% include "_logo.html" %}<span class="marca-nombre">Ojo de Dios</span></div>
+    <h1 class="h4">Sin conexión a internet</h1>
+    <p class="text-secondary">Las alertas y las imágenes se consultan en vivo para que siempre veas datos actuales. Vuelve a intentarlo cuando tengas señal.</p>
+    <button class="btn btn-bosque" onclick="location.reload()">Reintentar</button>
+  </div>
+</body>
+</html>

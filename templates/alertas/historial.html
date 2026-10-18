@@ -16,15 +16,15 @@
   <div class="col-md-3"><select name="gravedad" class="form-select" onchange="this.form.submit()"><option value="">Toda gravedad</option>
     {% for v, t in gravedades %}<option value="{{ v }}" {% if filtros.gravedad == v %}selected{% endif %}>{{ t }}</option>{% endfor %}</select></div>
 </form>
-<div class="tarjeta p-0">
+<div class="tarjeta p-0 solo-escritorio">
       <table class="table table-hover mb-0">
-        <thead><tr><th>#</th><th>Detectada</th><th>Concesión</th><th>Tipo</th><th>Ubicación</th><th>Gravedad</th><th class="text-end">Hectáreas</th><th>Estado</th></tr></thead>
+        <thead><tr><th class="col-opc">#</th><th>Detectada</th><th class="col-opc">Concesión</th><th>Tipo</th><th class="col-opc">Ubicación</th><th>Gravedad</th><th class="text-end">Hectáreas</th><th>Estado</th></tr></thead>
         <tbody>
         {% for a in alertas %}
           <tr onclick="location='{% url 'alertas:detalle' a.pk %}'" style="cursor:pointer">
-            <td>{{ a.pk }}</td><td>{{ a.fecha_deteccion|date:"d/m/Y" }}</td><td>{{ a.concesion.nombre }}</td>
+            <td class="col-opc">{{ a.pk }}</td><td>{{ a.fecha_deteccion|date:"d/m/Y" }}</td><td class="col-opc">{{ a.concesion.nombre }}</td>
             <td>{{ a.get_tipo_cambio_display }}</td>
-            <td class="text-secondary">{% if a.dentro_concesion %}Dentro{% else %}Perímetro{% endif %}</td>
+            <td class="text-secondary col-opc">{% if a.dentro_concesion %}Dentro{% else %}Perímetro{% endif %}</td>
             <td><span class="insignia g-{{ a.gravedad }}">{{ a.get_gravedad_display }}</span></td>
             <td class="text-end">{{ a.area_ha|floatformat:"2g" }}</td>
             <td><span class="insignia e-{{ a.estado }}">{{ a.get_estado_display }}</span></td>
@@ -32,6 +32,15 @@
         {% empty %}<tr><td colspan="8" class="text-secondary p-3">No hay alertas con esos filtros.</td></tr>{% endfor %}
         </tbody>
       </table>
+</div>
+<div class="tarjeta solo-movil">
+  {% for a in alertas %}
+    <a href="{% url 'alertas:detalle' a.pk %}" class="fila-alerta">
+      <span class="punto p-{{ a.gravedad }}"></span>
+      <span><b>{{ a.get_tipo_cambio_display }}</b><small>{{ a.fecha_deteccion|date:"d/m/Y" }} · {% if a.dentro_concesion %}Dentro{% else %}Perímetro{% endif %} · {{ a.get_estado_display }}</small></span>
+      <span class="ha">{{ a.area_ha|floatformat:"2g" }} ha</span>
+    </a>
+  {% empty %}<p class="text-secondary mb-0">No hay alertas con esos filtros.</p>{% endfor %}
 </div>
 <p class="text-secondary small mt-2 mb-0">{{ alertas|length }} alerta{{ alertas|length|pluralize }}. Para verlas en el mapa usa el <a href="{% url 'inicio' %}">mapa general</a>; cada alerta abre su ubicación exacta.</p>
 {% endblock %}

@@ -5,7 +5,7 @@
   <div><h1>Análisis de cambio</h1><p>Comparaciones entre dos fechas de una misma concesión</p></div>
   <a href="{% url 'analisis:nuevo' %}" class="btn btn-bosque"><i class="bi bi-plus-lg"></i> Nuevo análisis</a>
 </div>
-<div class="tarjeta p-0">
+<div class="tarjeta p-0 solo-escritorio">
   <table class="table table-hover mb-0">
     <thead><tr><th>#</th><th>Concesión</th><th>Periodo</th><th>Cobertura</th><th class="text-end">Pérdida (ha)</th><th>Alertas</th><th>Ejecutado</th></tr></thead>
     <tbody>
@@ -21,5 +21,14 @@
     {% empty %}<tr><td colspan="7" class="text-secondary p-3">Todavía no se ha ejecutado ningún análisis.</td></tr>{% endfor %}
     </tbody>
   </table>
+</div>
+<div class="tarjeta solo-movil">
+  {% for a in lista %}
+    <a href="{% url 'analisis:detalle' a.pk %}" class="fila-alerta">
+      <span class="punto p-alta"></span>
+      <span><b>#{{ a.pk }} · {{ a.concesion.nombre }}</b><small>{{ a.imagen_antes.vuelo.fecha_vuelo|date:"d/m/Y" }} → {{ a.imagen_despues.vuelo.fecha_vuelo|date:"d/m/Y" }} · {{ a.cobertura_antes_pct|floatformat:0 }}% → {{ a.cobertura_despues_pct|floatformat:0 }}% · {{ a.alertas.count }} alertas</small></span>
+      <span class="ha">{{ a.area_perdida_ha|floatformat:"1g" }} ha</span>
+    </a>
+  {% empty %}<p class="text-secondary mb-0">Todavía no se ha ejecutado ningún análisis.</p>{% endfor %}
 </div>
 {% endblock %}

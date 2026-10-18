@@ -9,6 +9,11 @@ load_dotenv(BASE_DIR / ".env")
 SECRET_KEY = os.getenv("SECRET_KEY", "solo-para-desarrollo-cambiar-en-produccion")
 DEBUG = os.getenv("DEBUG", "1") == "1"
 ALLOWED_HOSTS = os.getenv("ALLOWED_HOSTS", "localhost,127.0.0.1").split(",")
+# Para abrir el sistema desde el celular con HTTPS (necesario para instalar la app) se usa un
+# tunel temporal de Cloudflare: cloudflared tunnel --url http://localhost:8000
+if DEBUG:
+    ALLOWED_HOSTS += [".trycloudflare.com"]
+CSRF_TRUSTED_ORIGINS = ["https://*.trycloudflare.com"] if DEBUG else []
 
 INSTALLED_APPS = [
     "django.contrib.admin",

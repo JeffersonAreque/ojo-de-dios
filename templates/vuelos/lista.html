@@ -13,7 +13,7 @@
     {% if user.es_tecnico %}<a href="{% url 'vuelos:nuevo' %}" class="btn btn-bosque text-nowrap"><i class="bi bi-upload"></i> Registrar vuelo</a>{% endif %}
   </div>
 </div>
-<div class="tarjeta p-0">
+<div class="tarjeta p-0 solo-escritorio">
   <table class="table table-hover mb-0">
     <thead><tr><th>Fecha</th><th>Concesión</th><th>Dron / fuente</th><th>Operador</th><th>Imágenes</th></tr></thead>
     <tbody>
@@ -26,5 +26,14 @@
     {% empty %}<tr><td colspan="5" class="text-secondary p-3">No hay vuelos registrados.</td></tr>{% endfor %}
     </tbody>
   </table>
+</div>
+<div class="tarjeta solo-movil">
+  {% for v in vuelos %}
+    <a href="{% url 'vuelos:detalle' v.pk %}" class="fila-alerta">
+      <span class="punto" style="background:var(--hoja)"></span>
+      <span><b>{{ v.fecha_vuelo|date:"d/m/Y" }} · {{ v.concesion.nombre }}</b><small>{{ v.dron|default:"—" }} · {{ v.operador.get_full_name|default:v.operador.username }}</small></span>
+      <span class="ha">{{ v.imagenes.all|length }} img</span>
+    </a>
+  {% empty %}<p class="text-secondary mb-0">No hay vuelos registrados.</p>{% endfor %}
 </div>
 {% endblock %}

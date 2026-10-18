@@ -151,3 +151,11 @@ class FlujoAlertasTests(TestCase):
             call_command("preparar_demo", "--confirmar", stdout=StringIO())
         self.assertFalse(Concesion.objects.filter(codigo_contrato="17-TAM/C-ECO-DEMO-01").exists())
         self.assertFalse(Usuario.objects.filter(username="cliente", is_active=True).exists())
+
+    def test_app_instalable(self):
+        manifest = self.client.get(reverse("manifest")).json()
+        self.assertEqual(manifest["display"], "standalone")
+        self.assertTrue(any(i["sizes"] == "512x512" for i in manifest["icons"]))
+        sw = self.client.get(reverse("service_worker"))
+        self.assertEqual(sw["Content-Type"], "application/javascript")
+        self.assertEqual(self.client.get(reverse("sin_conexion")).status_code, 200)

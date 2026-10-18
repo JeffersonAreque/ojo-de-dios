@@ -21,7 +21,7 @@
     {% if form.errors %}<div class="alert alert-danger py-2">Usuario o contraseña incorrectos.</div>{% endif %}
     <form method="post">{% csrf_token %}
       <label class="form-label" for="usuario">Usuario</label>
-      <input id="usuario" name="username" class="form-control mb-3" autocomplete="username" autofocus required>
+      <input id="usuario" name="username" class="form-control mb-3" autocomplete="username" autocapitalize="none" autocorrect="off" spellcheck="false" autofocus required>
       <label class="form-label" for="clave">Contraseña</label>
       <input id="clave" name="password" type="password" class="form-control mb-4" autocomplete="current-password" required>
       <input type="hidden" name="next" value="{{ next }}">

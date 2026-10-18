@@ -25,7 +25,7 @@ def inicio(request):
         "concesiones": concesiones,
         "total_vuelos": Vuelo.objects.filter(concesion__in=concesiones).count(),
         "conteo": conteo,
-        "recientes": alertas.select_related("concesion", "analisis__imagen_despues__vuelo")[:6],
+        "recientes": alertas.select_related("concesion", "analisis__imagen_despues__vuelo").order_by("-analisis__ejecutado", "-area_m2")[:6],
         "mapa_concesiones": [
             {"id": c.pk, "nombre": c.nombre, "limite": c.limite} for c in concesiones
         ],

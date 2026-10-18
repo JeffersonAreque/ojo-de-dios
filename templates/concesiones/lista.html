@@ -10,7 +10,7 @@
   </div>
   {% endif %}
 </div>
-<div class="tarjeta p-0">
+<div class="tarjeta p-0 solo-escritorio">
       <table class="table table-hover mb-0">
         <thead><tr><th>Concesión</th><th>Titular</th><th>Tipo</th><th class="text-end">Área (ha)</th><th>Última imagen</th><th class="text-end">Alertas confirmadas</th></tr></thead>
         <tbody>
@@ -28,5 +28,14 @@
         {% endfor %}
         </tbody>
       </table>
+</div>
+<div class="tarjeta solo-movil">
+  {% for c in concesiones %}
+    <a href="{% url 'concesiones:detalle' c.pk %}" class="fila-alerta">
+      <span class="punto" style="background:var(--hoja)"></span>
+      <span><b>{{ c.nombre }}</b><small>{{ c.concesionaria }} · {{ c.area_ha|floatformat:"1g" }} ha · última imagen {{ c.ultimo_vuelo|date:"d/m/Y"|default:"—" }}</small></span>
+      <span class="ha">{% if c.n_confirmadas %}<span class="insignia g-alta">{{ c.n_confirmadas }}</span>{% else %}0{% endif %}</span>
+    </a>
+  {% empty %}<p class="text-secondary mb-0">No hay concesiones registradas.</p>{% endfor %}
 </div>
 {% endblock %}

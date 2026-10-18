@@ -16,7 +16,7 @@
 
 <div class="row g-3">
   <div class="col-xl-8">
-    <div class="tarjeta p-0">
+    <div class="tarjeta p-0 solo-escritorio">
       <table class="table mb-0">
         <thead><tr><th>Cliente</th><th>Plan</th><th class="text-end">Concesiones</th><th class="text-end">Hectáreas</th><th class="text-end">Alertas</th><th class="text-end">Mensualidad</th></tr></thead>
         <tbody>
@@ -32,6 +32,17 @@
         {% empty %}<tr><td colspan="6" class="text-secondary p-3">Aún no hay clientes activos.</td></tr>{% endfor %}
         </tbody>
       </table>
+    </div>
+  </div>
+  <div class="col-12 solo-movil">
+    <div class="tarjeta">
+      {% for f in r.clientes %}
+        <a href="{% url 'admin:concesiones_concesionaria_change' f.cliente.pk %}" class="fila-alerta">
+          <span class="punto" style="background:var(--hoja)"></span>
+          <span><b>{{ f.cliente.razon_social }}</b><small><span class="insignia plan-{{ f.plan_clave }}">{{ f.plan }}</span> · {% if f.concesiones %}{{ f.concesiones }} concesión · {{ f.hectareas|floatformat:"0g" }} ha · {{ f.alertas }} alertas{% else %}En implementación{% endif %}</small></span>
+          <span class="ha">S/ {{ f.mensual|intcomma }}</span>
+        </a>
+      {% endfor %}
     </div>
   </div>
   <div class="col-xl-4">
