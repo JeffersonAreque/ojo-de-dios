@@ -71,7 +71,12 @@ def nueva(request):
         concesion = form.save()
         messages.success(request, f"Concesión «{concesion.nombre}» registrada ({concesion.area_ha} ha).")
         return redirect("concesiones:detalle", pk=concesion.pk)
-    return render(request, "concesiones/form.html", {"form": form})
+    # Las concesiones ya registradas se muestran como referencia para dibujar la nueva en el lugar correcto.
+    existentes = concesiones_visibles(request.user)
+    return render(request, "concesiones/form.html", {
+        "form": form,
+        "mapa_concesiones": [{"id": c.pk, "nombre": c.nombre, "limite": c.limite} for c in existentes],
+    })
 
 
 @rol_requerido(Usuario.Rol.ANALISTA)

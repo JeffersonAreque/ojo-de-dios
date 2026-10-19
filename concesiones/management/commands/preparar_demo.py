@@ -4,7 +4,8 @@
   python manage.py preparar_demo --confirmar  -> lo hace
 
 Que hace:
-  1. Borra la concesion de prueba "Bajo Tambopata (demo)" con sus vuelos, imagenes, analisis y alertas.
+  1. Borra la concesion de prueba "Bajo Tambopata (demo)" y las de practica (codigo PRACTICA...),
+     con sus vuelos, imagenes, analisis y alertas.
   2. Borra analisis repetidos (mismas dos fechas) que no tienen ninguna alerta revisada.
   3. Borra los usuarios de prueba (Ana, Tomas, Carla); si alguno tiene registros, solo lo desactiva.
   4. Pone el nombre real de José al usuario "josee".
@@ -64,10 +65,16 @@ class Command(BaseCommand):
                           f"analisis/comparar/{analisis.pk}_antes.jpg", f"analisis/comparar/{analisis.pk}_despues.jpg"]
 
     def _concesion_de_prueba(self):
-        concesion = Concesion.objects.filter(codigo_contrato=CODIGO_PRUEBA).first()
-        if not concesion:
-            self._decir("La concesión de prueba ya no existe.")
+        # La de prueba original y cualquier concesion de practica (codigo que empieza con PRACTICA)
+        practica = list(Concesion.objects.filter(codigo_contrato__istartswith="PRACTICA"))
+        original = Concesion.objects.filter(codigo_contrato=CODIGO_PRUEBA).first()
+        if not practica and not original:
+            self._decir("No hay concesiones de prueba ni de práctica.")
             return
+        for c in practica + ([original] if original else []):
+            self._borrar_concesion(c)
+
+    def _borrar_concesion(self, concesion):
         analisis = list(concesion.analisis.all())
         for a in analisis:
             self._archivos_de_analisis(a)

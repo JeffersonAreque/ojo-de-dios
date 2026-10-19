@@ -14,7 +14,7 @@
   <link rel="stylesheet" href="{% static 'vendor/bootstrap-icons/bootstrap-icons.min.css' %}">
   <link rel="stylesheet" href="{% static 'vendor/leaflet/leaflet.css' %}">
   {% block css %}{% endblock %}
-  <link rel="stylesheet" href="{% static 'css/app.css' %}?v=8">
+  <link rel="stylesheet" href="{% static 'css/app.css' %}?v=9">
 </head>
 <body>
 {% if user.is_authenticated %}
@@ -58,7 +58,7 @@
 {% endif %}
 <script src="{% static 'vendor/bootstrap/bootstrap.bundle.min.js' %}"></script>
 <script src="{% static 'vendor/leaflet/leaflet.js' %}"></script>
-<script src="{% static 'js/mapa.js' %}?v=4"></script>
+<script src="{% static 'js/mapa.js' %}?v=6"></script>
 <script src="{% static 'js/comparador.js' %}?v=4" defer></script>
 <script src="{% static 'js/app.js' %}?v=1" defer></script>
 {% block js %}{% endblock %}

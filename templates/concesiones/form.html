@@ -17,11 +17,14 @@
   </div>
   <div class="col-lg-8"><div id="mapa" class="mapa" style="height:560px"></div></div>
 </form>
+{{ mapa_concesiones|json_script:"mapa-concesiones" }}
 {% endblock %}
 {% block js %}
 <script src="{% static 'vendor/leaflet-draw/leaflet.draw.js' %}"></script>
 <script>
-  const mapa = crearMapa("mapa", { centro: [-12.82, -69.28], zoom: 13 });
+  // Sin centro fijo: el mapa se encuadra en las concesiones ya registradas (línea amarilla punteada).
+  const mapa = crearMapa("mapa", { base: "sentinel"{% if not mapa_concesiones %}, centro: [-12.85, -69.9], zoom: 10{% endif %} });
+  agregarUbicacion(mapa);
   const dibujos = new L.FeatureGroup().addTo(mapa);
   const campo = document.getElementById("{{ form.limite.id_for_label }}");
   const aviso = document.getElementById("area");

@@ -22,6 +22,20 @@ function crearMapa(idContenedor, opciones = {}) {
     "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
     { maxZoom: 19, attribution: "Imágenes © Esri" }
   ).addTo(mapa);
+  // Mosaico Sentinel-2 sin nubes (EOX, año 2023): el mismo satélite que usa Copernicus Browser,
+  // más actual que el fondo de Esri en zonas de minería como La Pampa. Hasta zoom 15 aprox. (10 m/píxel).
+  const sentinel = L.tileLayer(
+    "https://tiles.maps.eox.at/wmts/1.0.0/s2cloudless-2023_3857/default/g/{z}/{y}/{x}.jpg",
+    { maxZoom: 19, maxNativeZoom: 15, attribution: "Sentinel-2 cloudless 2023 © EOX (datos Copernicus modificados)" }
+  );
+  if (opciones.base === "sentinel") {
+    mapa.removeLayer(satelite);
+    sentinel.addTo(mapa);
+    // si el servicio no responde, se vuelve al satélite de Esri para no dejar el mapa en blanco
+    sentinel.once("tileerror", () => {
+      if (mapa.hasLayer(sentinel)) { mapa.removeLayer(sentinel); satelite.addTo(mapa).bringToBack(); }
+    });
+  }
   const calles = L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
     maxZoom: 19, attribution: "© OpenStreetMap",
   });
@@ -70,7 +84,7 @@ function crearMapa(idContenedor, opciones = {}) {
   });
   superpuestas["Alertas"] = capaAlertas;
 
-  L.control.layers({ "Satélite": satelite, "Calles": calles }, superpuestas).addTo(mapa);
+  L.control.layers({ "Sentinel-2 (2023)": sentinel, "Satélite alta resolución": satelite, "Calles": calles }, superpuestas).addTo(mapa);
 
   const leyenda = L.control({ position: "bottomright" });
   leyenda.onAdd = () => {
@@ -105,7 +119,7 @@ function agregarBuscador(mapa) {
   const control = L.control({ position: "topright" });
   control.onAdd = () => {
     const div = L.DomUtil.create("div", "buscador");
-    div.innerHTML = '<input type="search" placeholder="Buscar lugar (ej. Puerto Maldonado)">';
+    div.innerHTML = '<input type="search" placeholder="Lugar o coordenadas (-12.98, -69.97)">';
     L.DomEvent.disableClickPropagation(div);
     L.DomEvent.disableScrollPropagation(div);
     const campo = div.querySelector("input");
@@ -115,6 +129,16 @@ function agregarBuscador(mapa) {
       e.preventDefault(); // el mapa a veces esta dentro de un formulario
       const texto = campo.value.trim();
       if (!texto) return;
+      // Coordenadas "latitud, longitud" (como las muestra Copernicus o Google Maps): ir directo.
+      const coords = texto.match(/^\s*(-?\d+(?:\.\d+)?)\s*[,;\s]\s*(-?\d+(?:\.\d+)?)\s*$/);
+      if (coords) {
+        const lat = Number(coords[1]), lon = Number(coords[2]);
+        if (Math.abs(lat) <= 90 && Math.abs(lon) <= 180) {
+          mapa.setView([lat, lon], 14);
+          L.circleMarker([lat, lon], { radius: 6, color: "#F6E7A6", weight: 2, fillOpacity: 0.6 }).addTo(mapa);
+          return;
+        }
+      }
       campo.disabled = true;
       try {
         const url = "https://nominatim.openstreetmap.org/search?format=json&limit=1&countrycodes=pe&q=" +
@@ -148,4 +172,39 @@ function mostrarImagen(mapa, indice, boton) {
     boton.parentElement.querySelectorAll("button").forEach((b) => b.classList.remove("active"));
     boton.classList.add("active");
   }
+}
+
+
+// Letrero "Estás en…": distrito, provincia y coordenadas del centro del mapa, en vivo.
+// Usa Nominatim (OpenStreetMap); se consulta como máximo una vez por segundo, al dejar de mover el mapa.
+function agregarUbicacion(mapa) {
+  const control = L.control({ position: "bottomleft" });
+  control.onAdd = () => {
+    const div = L.DomUtil.create("div", "ubicacion");
+    div.innerHTML = '<span class="lugar">Ubicando…</span><span class="coords"></span>';
+    return div;
+  };
+  control.addTo(mapa);
+  const lugar = control.getContainer().querySelector(".lugar");
+  const coords = control.getContainer().querySelector(".coords");
+  let espera = null, consulta = 0;
+
+  async function actualizar() {
+    const c = mapa.getCenter();
+    coords.textContent = `${c.lat.toFixed(5)}, ${c.lng.toFixed(5)}`;
+    const n = ++consulta;
+    try {
+      const url = `https://nominatim.openstreetmap.org/reverse?format=json&zoom=10&accept-language=es&lat=${c.lat}&lon=${c.lng}`;
+      const d = (await (await fetch(url)).json()).address || {};
+      if (n !== consulta) return; // llegó una respuesta vieja
+      const distrito = d.city || d.town || d.village || d.municipality || d.suburb || "";
+      const partes = [distrito && `Distrito de ${distrito.replace(/^Distrito de /, "")}`,
+                      d.county && `provincia de ${d.county.replace(/^Provincia de /, "")}`, d.state].filter(Boolean);
+      lugar.textContent = partes.length ? "Estás en: " + partes.join(", ") : "Estás en: zona sin nombre registrado";
+    } catch {
+      lugar.textContent = "Estás en: (sin conexión para ubicar)";
+    }
+  }
+  mapa.on("moveend", () => { clearTimeout(espera); espera = setTimeout(actualizar, 1000); });
+  mapa.whenReady(() => setTimeout(actualizar, 300));
 }
